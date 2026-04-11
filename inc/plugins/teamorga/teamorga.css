@@ -1,48 +1,49 @@
 /* ============================================================
    Teamorga – Design System
-   Integriert in das h4w-Forum-Design via --h4w-* Variablen
+   Works on any standard MyBB theme.
+   Override the --to-* variables in your theme CSS to adapt colours.
    ============================================================ */
 
 :root {
-    /* Backgrounds */
-    --to-bg:             var(--h4w-teamorga-color-bg-white, #e0e7f5);
-    --to-bg-subtle:      var(--h4w-teamorga-color-bg-light,  #dce5f6);
-    --to-bg-inset:       var(--h4w-bg-1, #d3def3);
+    /* Backgrounds – neutral grays matching MyBB default theme */
+    --to-bg:             #f5f5f5;
+    --to-bg-subtle:      #ebebeb;
+    --to-bg-inset:       #e0e0e0;
 
     /* Borders */
-    --to-border:         var(--h4w-bg-1, #d3def3);
-    --to-border-strong:  var(--h4w-teamorga-color-border-dark, #bbb);
+    --to-border:         #ddd;
+    --to-border-strong:  #bbb;
 
     /* Text */
-    --to-text:           var(--h4w-fontcolor-main, #262c45);
-    --to-text-dim:       var(--h4w-teamorga-color-gray-text,   #666);
-    --to-text-muted:     var(--h4w-teamorga-color-gray-medium, #555);
+    --to-text:           #333;
+    --to-text-dim:       #666;
+    --to-text-muted:     #888;
 
-    /* Accent */
-    --to-accent:         var(--h4w-highlight-1, #4984c9);
-    --to-accent-dim:     var(--h4w-teamorga-prio-normal, #b5c6e1);
-    --to-accent-hover:   var(--h4w-highlight-2, #062567);
+    /* Accent – moderate blue, neutral across themes */
+    --to-accent:         #366a9f;
+    --to-accent-dim:     #d0dde8;
+    --to-accent-hover:   #1a3e60;
 
-    /* Semantische Zustaende */
-    --to-success:        var(--h4w-teamorga-status-approved, #198754);
-    --to-success-bg:     var(--h4w-alert-green-bgcolor,  #ebfcdf);
-    --to-success-border: #b7dca8;
+    /* Status colours – Bootstrap 3 style (same base as MyBB default) */
+    --to-success:        #3c763d;
+    --to-success-bg:     #dff0d8;
+    --to-success-border: #d6e9c6;
 
-    --to-warning:        #7d5a00;
-    --to-warning-bg:     var(--h4w-alert-yellow-bgcolor,      #FFF6BF);
-    --to-warning-border: var(--h4w-alert-yellow-bordercolor,  #FFD324);
+    --to-warning:        #8a6d3b;
+    --to-warning-bg:     #fcf8e3;
+    --to-warning-border: #faebcc;
 
-    --to-danger:         var(--h4w-alert-red-fontcolor, #A5161A);
-    --to-danger-bg:      var(--h4w-alert-red-bgcolor,   #FBE3E4);
-    --to-danger-border:  #f5c6cb;
+    --to-danger:         #a94442;
+    --to-danger-bg:      #f2dede;
+    --to-danger-border:  #ebccd1;
 
-    --to-info:           var(--h4w-alert-blue-fontcolor, #1e729a);
-    --to-info-bg:        var(--h4w-alert-blue-bgcolor,   #e3f5fb);
-    --to-info-border:    #bee5eb;
+    --to-info:           #31708f;
+    --to-info-bg:        #d9edf7;
+    --to-info-border:    #bce8f1;
 
     /* Shape */
-    --to-radius:         4px;
-    --to-radius-sm:      3px;
+    --to-radius:         3px;
+    --to-radius-sm:      2px;
 
     /* Shadow */
     --to-shadow:         none;
@@ -53,6 +54,41 @@
 
     /* Font */
     --to-font:           inherit;
+    --to-font-size:      14px;
+
+    /* Table header – dark gray like MyBB default thead */
+    --to-thead-bg:       #555;
+    --to-thead-color:    #fff;
+    --to-thead-border:   1px solid #444;
+
+    /* Priority badge colours */
+    --to-prio-low-bg:    #e8f0f8;
+    --to-prio-low-color: #366a9f;
+    --to-prio-medium-bg:    #fcf8e3;
+    --to-prio-medium-color: #8a6d3b;
+    --to-prio-high-bg:    #f2dede;
+    --to-prio-high-color: #a94442;
+    --to-prio-inactive-bg: #e8e8e8;
+
+    /* Form inputs */
+    --to-input-border:   #ccc;
+    --to-input-bg:       #fff;
+    --to-input-color:    #333;
+
+    /* Category / section label colour */
+    --to-label-color:    #777;
+
+    /* Generic button */
+    --to-btn-bg:         #f5f5f5;
+    --to-btn-hover-bg:   #e8e8e8;
+
+    /* "Add" action button */
+    --to-btn-add-bg:     #555;
+    --to-btn-add-color:  #fff;
+
+    /* Links inside alerts */
+    --to-link:           #366a9f;
+    --to-link-hover:     #1a3e60;
 }
 
 /* ─── Card ───────────────────────────────────────────────── */
@@ -73,17 +109,17 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Header wie MyBB thead */
+/* Header like MyBB thead */
 .teamorga-box h3 {
     margin: 0;
     padding: 7px 14px;
-    font-size: var(--h4w-font-size-main, 14px);
+    font-size: var(--to-font-size);
     font-weight: 700;
     letter-spacing: .02em;
     text-transform: none;
-    color: var(--h4w-thead-color, #fff);
-    background: var(--h4w-thead-bg, #4984c9);
-    border-bottom: var(--h4w-thead-border-bottom, 1px solid #3a6fa0);
+    color: var(--to-thead-color);
+    background: var(--to-thead-bg);
+    border-bottom: var(--to-thead-border);
     font-family: var(--to-font);
 }
 
@@ -124,14 +160,14 @@
     margin-right: 10px;
     border: none;
     background: none;
-    color: var(--h4w-teamorga-color-editlink);
+    color: var(--to-text-dim);
     padding: 5px 9px;
     font-size: .8125rem;
 }
 
 .teamorga-header-meta > .teamorga-btn:hover {
-    color: var(--h4w-highlight-1);
-    background: var(--h4w-teamorga-prio-normal);
+    color: var(--to-accent);
+    background: var(--to-accent-dim);
     border-radius: var(--to-radius-sm);
 }
 
@@ -171,12 +207,11 @@
     letter-spacing: .03em;
 }
 
-/* Prio-Farben aus den Theme-Variablen */
-.teamorga-low      { background: var(--h4w-teamorga-prio-low);      color: var(--h4w-teambereich-low-color);    }
-.teamorga-normal   { background: var(--h4w-teamorga-prio-normal);   color: var(--h4w-highlight-2);              }
-.teamorga-medium   { background: var(--h4w-teamorga-prio-medium);   color: var(--h4w-teambereich-medium-color); }
-.teamorga-high     { background: var(--h4w-teamorga-prio-high);     color: var(--h4w-teambereich-high-color);   }
-.teamorga-inactive { background: var(--h4w-teamorga-prio-inactive); color: var(--to-text-muted); text-decoration: line-through; }
+.teamorga-low      { background: var(--to-prio-low-bg);      color: var(--to-prio-low-color);    }
+.teamorga-normal   { background: var(--to-accent-dim);        color: var(--to-accent-hover);      }
+.teamorga-medium   { background: var(--to-prio-medium-bg);    color: var(--to-prio-medium-color); }
+.teamorga-high     { background: var(--to-prio-high-bg);      color: var(--to-prio-high-color);   }
+.teamorga-inactive { background: var(--to-prio-inactive-bg);  color: var(--to-text-muted); text-decoration: line-through; }
 
 /* ─── Buttons ────────────────────────────────────────────── */
 
@@ -188,8 +223,8 @@
     padding: 5px 12px;
     border: 1px solid var(--to-border-strong);
     border-radius: var(--to-radius-sm);
-    background: var(--h4w-teamorga-btn-bg);
-    color: var(--h4w-highlight-1);
+    background: var(--to-btn-bg);
+    color: var(--to-accent);
     font-size: .8125rem;
     font-weight: 500;
     font-family: var(--to-font);
@@ -200,9 +235,9 @@
 }
 
 .teamorga-btn:hover {
-    background: var(--h4w-teamorga-btn-hover);
-    border-color: var(--h4w-highlight-1);
-    color: var(--h4w-highlight-2);
+    background: var(--to-btn-hover-bg);
+    border-color: var(--to-accent);
+    color: var(--to-accent-hover);
     text-decoration: none;
 }
 
@@ -231,14 +266,14 @@
 }
 
 .teamorga-btn-change {
-    background: var(--to-info-bg, #e3f5fb);
-    border-color: var(--to-info-border, #bee5eb);
-    color: var(--to-info, #1e729a);
+    background: var(--to-info-bg);
+    border-color: var(--to-info-border);
+    color: var(--to-info);
 }
 
 .teamorga-btn-change:hover {
-    background: var(--to-info, #1e729a);
-    border-color: var(--to-info, #1e729a);
+    background: var(--to-info);
+    border-color: var(--to-info);
     color: #fff;
 }
 
@@ -255,27 +290,27 @@
 }
 
 .teamorga-btn-toggle {
-    background: var(--h4w-teamorga-prio-normal);
+    background: var(--to-accent-dim);
     border-color: transparent;
-    color: var(--h4w-highlight-2);
+    color: var(--to-accent-hover);
 }
 
 .teamorga-btn-toggle:hover {
-    background: var(--h4w-highlight-1);
-    border-color: var(--h4w-highlight-1);
-    color: var(--h4w-bg-1);
+    background: var(--to-accent);
+    border-color: var(--to-accent);
+    color: var(--to-bg-inset);
 }
 
 .teamorga-btn-add {
-    background: var(--h4w-button-bg);
+    background: var(--to-btn-add-bg);
     border-color: transparent;
-    color: var(--h4w-button-color);
+    color: var(--to-btn-add-color);
 }
 
 .teamorga-btn-add:hover {
-    background: var(--h4w-highlight-2);
+    background: var(--to-accent-hover);
     border-color: transparent;
-    color: var(--h4w-bg-1);
+    color: #fff;
 }
 
 
@@ -352,9 +387,9 @@
 }
 
 .teamorga-btn-ownership:hover {
-    background: var(--h4w-highlight-1);
-    border-color: var(--h4w-highlight-1);
-    color: var(--h4w-bg-1);
+    background: var(--to-accent);
+    border-color: var(--to-accent);
+    color: #fff;
 }
 
 .teamorga-btn-ownership--remove:hover {
@@ -380,7 +415,7 @@
     gap: 5px;
     font-size: .8125rem;
     font-weight: 600;
-    color: var(--to-info, #1e729a);
+    color: var(--to-info);
 }
 
 /* ─── Participant Lists ───────────────────────────────────── */
@@ -403,7 +438,7 @@
     font-weight: 700;
     letter-spacing: .07em;
     text-transform: uppercase;
-    color: var(--h4w-tcat-color);
+    color: var(--to-label-color);
     margin-bottom: 5px;
 }
 
@@ -460,7 +495,7 @@
     align-items: center;
 }
 
-/* Eingabefelder – Forum-Select-Stil */
+/* Input fields */
 .teamorga-box input[type="date"],
 .teamorga-box input[type="text"],
 .teamorga-box select,
@@ -469,10 +504,10 @@
 .teamorga-participation-form input[type="text"] {
     font-size: .8125rem;
     padding: 5px 10px;
-    border: 1px solid var(--h4w-select-bordercolor);
+    border: 1px solid var(--to-input-border);
     border-radius: var(--to-radius-sm);
-    background: var(--h4w-select-bg);
-    color: var(--h4w-select-color);
+    background: var(--to-input-bg);
+    color: var(--to-input-color);
     font-family: var(--to-font);
     transition: border-color var(--to-t), box-shadow var(--to-t);
 }
@@ -483,8 +518,8 @@
 .teamorga-box textarea:focus,
 .teamorga-participation-form select:focus {
     outline: none;
-    border-color: var(--h4w-highlight-1);
-    box-shadow: 0 0 0 2px var(--h4w-teamorga-prio-normal);
+    border-color: var(--to-accent);
+    box-shadow: 0 0 0 2px var(--to-accent-dim);
 }
 
 .teamorga-box textarea {
@@ -493,28 +528,10 @@
     min-height: 88px;
     resize: vertical;
     line-height: 1.5;
-    color: var(--h4w-textarea-color);
+    color: var(--to-input-color);
 }
 
-/* Eingabefelder-Block (im newreply-Formular) */
-.teamorga-inputfields {
-    margin: 10px 0;
-    padding: 12px 14px;
-    background: var(--to-bg-subtle);
-    border: 1px solid var(--to-border);
-    border-radius: var(--to-radius);
-}
-
-.teamorga-inputfields-label {
-    font-size: .6875rem;
-    font-weight: 700;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--h4w-tcat-color);
-    margin-bottom: 10px;
-    display: block;
-    font-family: var(--to-font);
-}
+/* (teamorga-inputfields and newreply-wrap now use MyBB tborder table layout) */
 
 /* ─── Ownership Block ────────────────────────────────────── */
 
@@ -578,16 +595,16 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     justify-content: space-between;
     align-items: center;
     padding: 7px 10px;
-    border-bottom: var(--h4w-thead-border-bottom, 1px solid #3a6fa0);
-    background: var(--h4w-thead-bg, #4984c9);
+    border-bottom: var(--to-thead-border);
+    background: var(--to-thead-bg);
     gap: 8px;
 }
 
 .teamorga-suggestion-author {
     flex: 1;
-    font-size: var(--h4w-font-size-main, 14px);
+    font-size: var(--to-font-size);
     font-weight: 700;
-    color: var(--h4w-thead-color, #fff);
+    color: var(--to-thead-color);
     font-family: var(--to-font);
     letter-spacing: .02em;
 }
@@ -610,7 +627,7 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 .teamorga-suggestion-head .teamorga-edit-link {
     background: transparent;
     border-color: rgba(255, 255, 255, 0.4);
-    color: var(--h4w-thead-color, #fff);
+    color: var(--to-thead-color);
     opacity: .85;
     padding: 3px 9px;
     font-size: .75rem;
@@ -639,7 +656,7 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 
 .teamorga-suggestion-body {
     padding: 10px 12px;
-    font-size: var(--h4w-font-size-main, 14px);
+    font-size: var(--to-font-size);
     color: var(--to-text);
     line-height: 1.55;
 }
@@ -683,7 +700,7 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     font-weight: 700;
     letter-spacing: .06em;
     text-transform: uppercase;
-    color: var(--h4w-tcat-color);
+    color: var(--to-label-color);
     margin-bottom: 7px;
     display: block;
     font-family: var(--to-font);
@@ -700,20 +717,20 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     align-items: center;
     gap: 4px;
     padding: 3px 10px;
-    background: var(--h4w-bg-1);
+    background: var(--to-bg-inset);
     border: 1px solid var(--to-border);
     border-radius: 100px;
     text-decoration: none;
     font-size: .75rem;
     font-weight: 500;
-    color: var(--h4w-fontcolor-main);
+    color: var(--to-text);
     transition: background var(--to-t), color var(--to-t);
 }
 
 .teamorga-sug-link:hover {
-    background: var(--h4w-highlight-1);
-    border-color: var(--h4w-highlight-1);
-    color: var(--h4w-bg-1);
+    background: var(--to-accent);
+    border-color: var(--to-accent);
+    color: #fff;
     text-decoration: none;
 }
 
@@ -733,33 +750,6 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 }
 
 /* ─── New Reply – Vorschlag-Box ──────────────────────────── */
-
-/* "– optional" label neben dem Abschnitts-Label */
-.teamorga-newreply-optional {
-    font-weight: 400;
-    opacity: .6;
-    font-size: .85em;
-    margin-left: 3px;
-    letter-spacing: 0;
-    text-transform: none;
-}
-
-.teamorga-newreply-hint {
-    font-size: .8125rem;
-    color: var(--to-text-muted);
-    font-style: italic;
-    margin: 0 0 8px;
-    font-family: var(--to-font);
-    line-height: 1.45;
-}
-
-.teamorga-newreply-wrap textarea {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 96px;
-    resize: vertical;
-}
 
 /* ─── Alerts ─────────────────────────────────────────────── */
 
@@ -798,13 +788,13 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 
 .teamorga-alert a {
     font-weight: 600;
-    color: var(--h4w-linkcolor-main);
+    color: var(--to-link);
     text-decoration: none;
     transition: color var(--to-t);
 }
 
 .teamorga-alert a:hover {
-    color: var(--h4w-linkcolor-main-hover);
+    color: var(--to-link-hover);
     text-decoration: underline;
 }
 
@@ -823,8 +813,8 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     gap: 0;
     vertical-align: middle;
     margin-left: 6px;
-    background: var(--h4w-bg-1, #e8eef8);
-    border: 1px solid var(--to-border);
+    background: transparent;
+    border: none;
     border-radius: var(--to-radius-sm);
     overflow: hidden;
     font-size: .6875rem;
@@ -840,10 +830,10 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     flex-shrink: 0;
 }
 
-.teamorga-fd.teamorga-low      .teamorga-fd-prio-stripe { background: var(--h4w-teamorga-prio-low,    #c8d8f0); }
-.teamorga-fd.teamorga-normal   .teamorga-fd-prio-stripe { background: var(--h4w-teamorga-prio-normal, #b5c6e1); }
-.teamorga-fd.teamorga-medium   .teamorga-fd-prio-stripe { background: var(--h4w-teamorga-prio-medium, #f0c060); }
-.teamorga-fd.teamorga-high     .teamorga-fd-prio-stripe { background: var(--h4w-teamorga-prio-high,   #e07070); }
+.teamorga-fd.teamorga-low      .teamorga-fd-prio-stripe { background: var(--to-prio-low-bg,      #c8d8f0); }
+.teamorga-fd.teamorga-normal   .teamorga-fd-prio-stripe { background: var(--to-accent-dim,        #b5c6e1); }
+.teamorga-fd.teamorga-medium   .teamorga-fd-prio-stripe { background: var(--to-prio-medium-bg,    #f0c060); }
+.teamorga-fd.teamorga-high     .teamorga-fd-prio-stripe { background: var(--to-prio-high-bg,      #e07070); }
 .teamorga-fd.teamorga-inactive .teamorga-fd-prio-stripe { background: var(--to-border-strong); }
 
 /* Deadline */
@@ -857,17 +847,17 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 }
 
 .teamorga-fd-deadline--soon {
-    color: var(--to-warning, #7d5a00);
+    color: var(--to-warning);
     font-weight: 700;
 }
 
 .teamorga-fd-deadline--today {
-    color: var(--to-danger, #a5161a);
+    color: var(--to-danger);
     font-weight: 700;
 }
 
 .teamorga-fd-deadline--overdue {
-    color: var(--to-danger, #a5161a);
+    color: var(--to-danger);
     font-weight: 700;
     font-style: italic;
 }
@@ -901,10 +891,10 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     background: var(--to-border-strong);
 }
 
-.teamorga-fd-dot.teamorga-fd-status--approved  { background: var(--to-success,  #198754); }
-.teamorga-fd-dot.teamorga-fd-status--unanswered { background: var(--to-warning-border, #ffd324); }
-.teamorga-fd-dot.teamorga-fd-status--time       { background: var(--to-info,     #1e729a); }
-.teamorga-fd-dot.teamorga-fd-status--abstain    { background: var(--to-border-strong); }
+.teamorga-fd-dot.teamorga-fd-status--approved  { background: var(--to-success);        }
+.teamorga-fd-dot.teamorga-fd-status--unanswered { background: var(--to-warning-border); }
+.teamorga-fd-dot.teamorga-fd-status--time       { background: var(--to-info);           }
+.teamorga-fd-dot.teamorga-fd-status--abstain    { background: var(--to-border-strong);  }
 
 /* Action call-out – shown when user needs to do something */
 .teamorga-fd-action {
@@ -913,10 +903,10 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     gap: 4px;
     margin-top: 4px;
     padding: 2px 8px 2px 6px;
-    background: var(--to-warning-bg, #fff6bf);
-    border: 1px solid var(--to-warning-border, #ffd324);
+    background: var(--to-warning-bg);
+    border: 1px solid var(--to-warning-border);
     border-radius: var(--to-radius-sm);
-    color: var(--to-warning, #7d5a00);
+    color: var(--to-warning);
     font-size: .6875rem;
     font-weight: 600;
     font-family: var(--to-font);
@@ -924,15 +914,15 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 }
 
 .teamorga-fd-action--urgent {
-    background: var(--to-danger-bg, #fbe3e4);
-    border-color: var(--to-danger-border, #f5c6cb);
-    color: var(--to-danger, #a5161a);
+    background: var(--to-danger-bg);
+    border-color: var(--to-danger-border);
+    color: var(--to-danger);
 }
 
 /* dot inside badge (legacy) or dot immediately before an urgent badge */
 .teamorga-fd.teamorga-fd--urgent .teamorga-fd-dot.teamorga-fd-status--unanswered,
 .teamorga-fd-dot.teamorga-fd-status--unanswered:has(+ .teamorga-fd.teamorga-fd--urgent) {
-    background: var(--to-danger, #a5161a);
+    background: var(--to-danger);
 }
 
 /* ─── Responsive ─────────────────────────────────────────── */

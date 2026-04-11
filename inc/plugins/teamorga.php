@@ -292,19 +292,17 @@ function teamorga_activate()
 
     // Inject into core templates
     require_once MYBB_ROOT . "inc/adminfunctions_templates.php";
+    // Clean up any previous injection locations (idempotent activate)
     find_replace_templatesets("newthread", "#" . preg_quote('{$teamorga}') . "#i", '', 0);
-    find_replace_templatesets(
-        "newthread",
-        "#" . preg_quote('{$loginbox}') . "#i",
-        '{$teamorga}{$loginbox}'
+    find_replace_templatesets("newthread", "#" . preg_quote('{$teamorga_newreply_suggestion}') . "#i", '', 0);
+    // Inject deadline/prio fields + suggestion textarea as <tr> rows before {$postoptions}
+    // {$postoptions} is always inside the main <table class="tborder"> on any MyBB forum
+    find_replace_templatesets("newthread",
+        "#" . preg_quote('{$postoptions}') . "#i",
+        '{$teamorga}{$teamorga_newreply_suggestion}{$postoptions}'
     );
     find_replace_templatesets("newreply",  "#" . preg_quote('{$teamorga_newreply_suggestion}') . "#i", '', 0);
     find_replace_templatesets("newreply",
-        "#" . preg_quote('{$postoptions}') . "#i",
-        '{$teamorga_newreply_suggestion}{$postoptions}'
-    );
-    find_replace_templatesets("newthread", "#" . preg_quote('{$teamorga_newreply_suggestion}') . "#i", '', 0);
-    find_replace_templatesets("newthread",
         "#" . preg_quote('{$postoptions}') . "#i",
         '{$teamorga_newreply_suggestion}{$postoptions}'
     );
