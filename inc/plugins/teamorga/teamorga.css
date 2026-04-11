@@ -1,0 +1,969 @@
+/* ============================================================
+   Teamorga – Design System
+   Integriert in das h4w-Forum-Design via --h4w-* Variablen
+   ============================================================ */
+
+:root {
+    /* Backgrounds */
+    --to-bg:             var(--h4w-teamorga-color-bg-white, #e0e7f5);
+    --to-bg-subtle:      var(--h4w-teamorga-color-bg-light,  #dce5f6);
+    --to-bg-inset:       var(--h4w-bg-1, #d3def3);
+
+    /* Borders */
+    --to-border:         var(--h4w-bg-1, #d3def3);
+    --to-border-strong:  var(--h4w-teamorga-color-border-dark, #bbb);
+
+    /* Text */
+    --to-text:           var(--h4w-fontcolor-main, #262c45);
+    --to-text-dim:       var(--h4w-teamorga-color-gray-text,   #666);
+    --to-text-muted:     var(--h4w-teamorga-color-gray-medium, #555);
+
+    /* Accent */
+    --to-accent:         var(--h4w-highlight-1, #4984c9);
+    --to-accent-dim:     var(--h4w-teamorga-prio-normal, #b5c6e1);
+    --to-accent-hover:   var(--h4w-highlight-2, #062567);
+
+    /* Semantische Zustaende */
+    --to-success:        var(--h4w-teamorga-status-approved, #198754);
+    --to-success-bg:     var(--h4w-alert-green-bgcolor,  #ebfcdf);
+    --to-success-border: #b7dca8;
+
+    --to-warning:        #7d5a00;
+    --to-warning-bg:     var(--h4w-alert-yellow-bgcolor,      #FFF6BF);
+    --to-warning-border: var(--h4w-alert-yellow-bordercolor,  #FFD324);
+
+    --to-danger:         var(--h4w-alert-red-fontcolor, #A5161A);
+    --to-danger-bg:      var(--h4w-alert-red-bgcolor,   #FBE3E4);
+    --to-danger-border:  #f5c6cb;
+
+    --to-info:           var(--h4w-alert-blue-fontcolor, #1e729a);
+    --to-info-bg:        var(--h4w-alert-blue-bgcolor,   #e3f5fb);
+    --to-info-border:    #bee5eb;
+
+    /* Shape */
+    --to-radius:         4px;
+    --to-radius-sm:      3px;
+
+    /* Shadow */
+    --to-shadow:         none;
+
+    /* Animation */
+    --to-ease:           cubic-bezier(0.4, 0, 0.2, 1);
+    --to-t:              160ms var(--to-ease);
+
+    /* Font */
+    --to-font:           inherit;
+}
+
+/* ─── Card ───────────────────────────────────────────────── */
+
+.teamorga-box {
+    background: var(--to-bg);
+    border: 1px solid var(--to-border);
+    border-radius: var(--to-radius);
+    margin: 0 0 16px;
+    overflow: hidden;
+    box-shadow: var(--to-shadow);
+    animation: to-in .2s var(--to-ease) both;
+    clear: both;
+}
+
+@keyframes to-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Header wie MyBB thead */
+.teamorga-box h3 {
+    margin: 0;
+    padding: 7px 14px;
+    font-size: var(--h4w-font-size-main, 14px);
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: none;
+    color: var(--h4w-thead-color, #fff);
+    background: var(--h4w-thead-bg, #4984c9);
+    border-bottom: var(--h4w-thead-border-bottom, 1px solid #3a6fa0);
+    font-family: var(--to-font);
+}
+
+/* ─── Header Meta Row ────────────────────────────────────── */
+
+.teamorga-header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    background: var(--to-bg-subtle);
+    border-bottom: 1px solid var(--to-border);
+}
+
+.teamorga-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    font-size: .8125rem;
+    color: var(--to-text-dim);
+    font-family: var(--to-font);
+    border-right: 1px solid var(--to-border);
+}
+
+.teamorga-meta-item:last-child {
+    border-right: none;
+}
+
+.teamorga-meta-item strong {
+    color: var(--to-text);
+    font-weight: 600;
+}
+
+/* Edit-Link rechts in der Meta-Zeile */
+.teamorga-header-meta > .teamorga-btn {
+    margin-left: auto;
+    align-self: center;
+    margin-right: 10px;
+    border: none;
+    background: none;
+    color: var(--h4w-teamorga-color-editlink);
+    padding: 5px 9px;
+    font-size: .8125rem;
+}
+
+.teamorga-header-meta > .teamorga-btn:hover {
+    color: var(--h4w-highlight-1);
+    background: var(--h4w-teamorga-prio-normal);
+    border-radius: var(--to-radius-sm);
+}
+
+/* ─── Status Bar ─────────────────────────────────────────── */
+
+.teamorga-status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: .8125rem;
+    color: var(--to-text-dim);
+    background: var(--to-bg-subtle);
+    border-top: 1px solid var(--to-border);
+    font-family: var(--to-font);
+}
+
+.teamorga-status-bar strong {
+    color: var(--to-text);
+    font-weight: 600;
+    margin-right: 2px;
+}
+
+/* ─── Priority / Status Badges ───────────────────────────── */
+
+.teamorga-low,
+.teamorga-normal,
+.teamorga-medium,
+.teamorga-high,
+.teamorga-inactive {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: .6875rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+}
+
+/* Prio-Farben aus den Theme-Variablen */
+.teamorga-low      { background: var(--h4w-teamorga-prio-low);      color: var(--h4w-teambereich-low-color);    }
+.teamorga-normal   { background: var(--h4w-teamorga-prio-normal);   color: var(--h4w-highlight-2);              }
+.teamorga-medium   { background: var(--h4w-teamorga-prio-medium);   color: var(--h4w-teambereich-medium-color); }
+.teamorga-high     { background: var(--h4w-teamorga-prio-high);     color: var(--h4w-teambereich-high-color);   }
+.teamorga-inactive { background: var(--h4w-teamorga-prio-inactive); color: var(--to-text-muted); text-decoration: line-through; }
+
+/* ─── Buttons ────────────────────────────────────────────── */
+
+.teamorga-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border: 1px solid var(--to-border-strong);
+    border-radius: var(--to-radius-sm);
+    background: var(--h4w-teamorga-btn-bg);
+    color: var(--h4w-highlight-1);
+    font-size: .8125rem;
+    font-weight: 500;
+    font-family: var(--to-font);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background var(--to-t), border-color var(--to-t), color var(--to-t);
+    white-space: nowrap;
+}
+
+.teamorga-btn:hover {
+    background: var(--h4w-teamorga-btn-hover);
+    border-color: var(--h4w-highlight-1);
+    color: var(--h4w-highlight-2);
+    text-decoration: none;
+}
+
+.teamorga-btn-approve {
+    background: var(--to-success-bg);
+    border-color: var(--to-success-border);
+    color: var(--to-success);
+}
+
+.teamorga-btn-approve:hover {
+    background: var(--to-success);
+    border-color: var(--to-success);
+    color: #fff;
+}
+
+.teamorga-btn-disapprove {
+    background: var(--to-danger-bg);
+    border-color: var(--to-danger-border);
+    color: var(--to-danger);
+}
+
+.teamorga-btn-disapprove:hover {
+    background: var(--to-danger);
+    border-color: var(--to-danger);
+    color: #fff;
+}
+
+.teamorga-btn-change {
+    background: var(--to-info-bg, #e3f5fb);
+    border-color: var(--to-info-border, #bee5eb);
+    color: var(--to-info, #1e729a);
+}
+
+.teamorga-btn-change:hover {
+    background: var(--to-info, #1e729a);
+    border-color: var(--to-info, #1e729a);
+    color: #fff;
+}
+
+.teamorga-btn-withdraw {
+    background: var(--to-warning-bg);
+    border-color: var(--to-warning-border);
+    color: var(--to-warning);
+}
+
+.teamorga-btn-withdraw:hover {
+    background: #d4a017;
+    border-color: #d4a017;
+    color: #fff;
+}
+
+.teamorga-btn-toggle {
+    background: var(--h4w-teamorga-prio-normal);
+    border-color: transparent;
+    color: var(--h4w-highlight-2);
+}
+
+.teamorga-btn-toggle:hover {
+    background: var(--h4w-highlight-1);
+    border-color: var(--h4w-highlight-1);
+    color: var(--h4w-bg-1);
+}
+
+.teamorga-btn-add {
+    background: var(--h4w-button-bg);
+    border-color: transparent;
+    color: var(--h4w-button-color);
+}
+
+.teamorga-btn-add:hover {
+    background: var(--h4w-highlight-2);
+    border-color: transparent;
+    color: var(--h4w-bg-1);
+}
+
+
+
+/* ─── Time proposal ─────────────────────────────────────── */
+
+.teamorga-time-proposal-date {
+    font-size: .75rem;
+    color: var(--to-text-dim);
+    font-style: italic;
+}
+
+.teamorga-time-proposal-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.teamorga-btn-proposal {
+    padding: 1px 7px;
+    font-size: .6875rem;
+}
+
+.teamorga-time-expand {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--to-border);
+}
+
+/* ─── Kick inline button ─────────────────────────────────── */
+
+.teamorga-btn-kick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--to-radius-sm);
+    color: var(--to-text-dim);
+    font-size: .7rem;
+    line-height: 1.4;
+    cursor: pointer;
+    opacity: .4;
+    transition: opacity var(--to-t), background var(--to-t), color var(--to-t), border-color var(--to-t);
+    vertical-align: middle;
+}
+
+.teamorga-btn-kick:hover {
+    opacity: 1;
+    background: var(--to-danger-bg);
+    border-color: var(--to-danger-border);
+    color: var(--to-danger);
+}
+
+/* ─── Ownership inline button ────────────────────────────── */
+
+.teamorga-btn-ownership {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 7px;
+    background: none;
+    border: 1px solid var(--to-border-strong);
+    border-radius: 100px;
+    color: var(--to-text-dim);
+    font-size: .6875rem;
+    font-weight: 600;
+    font-family: var(--to-font);
+    cursor: pointer;
+    transition: background var(--to-t), border-color var(--to-t), color var(--to-t);
+    vertical-align: middle;
+}
+
+.teamorga-btn-ownership:hover {
+    background: var(--h4w-highlight-1);
+    border-color: var(--h4w-highlight-1);
+    color: var(--h4w-bg-1);
+}
+
+.teamorga-btn-ownership--remove:hover {
+    background: var(--to-text-muted);
+    border-color: var(--to-text-muted);
+    color: #fff;
+}
+
+/* ─── Review status labels ───────────────────────────────── */
+
+.teamorga-review-yes {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .8125rem;
+    font-weight: 600;
+    color: var(--to-success);
+}
+
+.teamorga-review-no {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .8125rem;
+    font-weight: 600;
+    color: var(--to-info, #1e729a);
+}
+
+/* ─── Participant Lists ───────────────────────────────────── */
+
+.teamorga-participant-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--to-border);
+    border-top: 1px solid var(--to-border);
+}
+
+.teamorga-participant-group {
+    background: var(--to-bg-subtle);
+    padding: 10px 14px;
+}
+
+.teamorga-group-label {
+    font-size: .625rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--h4w-tcat-color);
+    margin-bottom: 5px;
+}
+
+/* Suggestion-Teilnehmerliste */
+.teamorga-suggestion-box .teamorga-participant-list {
+    border-top: 1px solid var(--to-border);
+}
+
+.teamorga-suggestion-box .teamorga-participant-group {
+    background: var(--to-bg);
+}
+
+/* ─── Participation Form ─────────────────────────────────── */
+
+.teamorga-participation-form {
+    padding: 12px 14px;
+    border-top: 1px solid var(--to-border);
+    background: var(--to-bg);
+}
+
+.teamorga-participation-form .teamorga-status-info {
+    font-size: .8125rem;
+    color: var(--to-text-dim);
+    margin-bottom: 10px;
+    font-family: var(--to-font);
+}
+
+/* ─── Forms ──────────────────────────────────────────────── */
+
+.teamorga-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.teamorga-form-row label {
+    font-size: .8125rem;
+    font-weight: 600;
+    color: var(--to-text);
+    min-width: 72px;
+    font-family: var(--to-font);
+}
+
+.teamorga-form-body {
+    padding: 12px 14px;
+}
+
+.teamorga-form-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Eingabefelder – Forum-Select-Stil */
+.teamorga-box input[type="date"],
+.teamorga-box input[type="text"],
+.teamorga-box select,
+.teamorga-box textarea,
+.teamorga-participation-form select,
+.teamorga-participation-form input[type="text"] {
+    font-size: .8125rem;
+    padding: 5px 10px;
+    border: 1px solid var(--h4w-select-bordercolor);
+    border-radius: var(--to-radius-sm);
+    background: var(--h4w-select-bg);
+    color: var(--h4w-select-color);
+    font-family: var(--to-font);
+    transition: border-color var(--to-t), box-shadow var(--to-t);
+}
+
+.teamorga-box input[type="date"]:focus,
+.teamorga-box input[type="text"]:focus,
+.teamorga-box select:focus,
+.teamorga-box textarea:focus,
+.teamorga-participation-form select:focus {
+    outline: none;
+    border-color: var(--h4w-highlight-1);
+    box-shadow: 0 0 0 2px var(--h4w-teamorga-prio-normal);
+}
+
+.teamorga-box textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 88px;
+    resize: vertical;
+    line-height: 1.5;
+    color: var(--h4w-textarea-color);
+}
+
+/* Eingabefelder-Block (im newreply-Formular) */
+.teamorga-inputfields {
+    margin: 10px 0;
+    padding: 12px 14px;
+    background: var(--to-bg-subtle);
+    border: 1px solid var(--to-border);
+    border-radius: var(--to-radius);
+}
+
+.teamorga-inputfields-label {
+    font-size: .6875rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--h4w-tcat-color);
+    margin-bottom: 10px;
+    display: block;
+    font-family: var(--to-font);
+}
+
+/* ─── Ownership Block ────────────────────────────────────── */
+
+.teamorga-ownership {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .8125rem;
+    padding: 8px 14px;
+    color: var(--to-text-dim);
+    background: var(--to-bg-subtle);
+    border-top: 1px solid var(--to-border);
+    font-family: var(--to-font);
+}
+
+.teamorga-ownership strong {
+    color: var(--to-text);
+    font-weight: 600;
+}
+
+/* ─── Suggestion Box ─────────────────────────────────────── */
+
+.teamorga-suggestion-box {
+    margin: 10px 14px;
+    border: 1px solid var(--to-border);
+    border-radius: var(--to-radius);
+    background: var(--to-bg);
+    overflow: hidden;
+}
+
+.teamorga-suggestion-box.inactive {
+    opacity: .7;
+}
+
+/* <details> reset – remove browser default marker and cursor */
+details.teamorga-suggestion-box > summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+details.teamorga-suggestion-box > summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Collapsed indicator in the author span */
+details.teamorga-suggestion-box > summary .teamorga-suggestion-author::before {
+    content: '▶';
+    font-size: .65em;
+    margin-right: 6px;
+    opacity: .7;
+    transition: transform var(--to-t);
+    display: inline-block;
+}
+
+details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::before {
+    transform: rotate(90deg);
+}
+
+.teamorga-suggestion-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 10px;
+    border-bottom: var(--h4w-thead-border-bottom, 1px solid #3a6fa0);
+    background: var(--h4w-thead-bg, #4984c9);
+    gap: 8px;
+}
+
+.teamorga-suggestion-author {
+    flex: 1;
+    font-size: var(--h4w-font-size-main, 14px);
+    font-weight: 700;
+    color: var(--h4w-thead-color, #fff);
+    font-family: var(--to-font);
+    letter-spacing: .02em;
+}
+
+.teamorga-suggestion-author em {
+    font-style: italic;
+    font-weight: 400;
+    opacity: .85;
+}
+
+.teamorga-suggestion-head-right {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Buttons/links inside the thead-style suggestion head */
+.teamorga-suggestion-head .teamorga-btn,
+.teamorga-suggestion-head .teamorga-edit-link {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.4);
+    color: var(--h4w-thead-color, #fff);
+    opacity: .85;
+    padding: 3px 9px;
+    font-size: .75rem;
+}
+
+.teamorga-suggestion-head .teamorga-btn:hover,
+.teamorga-suggestion-head .teamorga-edit-link:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.7);
+    color: #fff;
+    opacity: 1;
+    text-decoration: none;
+}
+
+.teamorga-suggestion-head .teamorga-edit-link {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: var(--to-radius-sm);
+    padding: 3px 8px;
+    text-decoration: none;
+    font-size: .75rem;
+    line-height: 1.4;
+    transition: background var(--to-t), border-color var(--to-t), opacity var(--to-t);
+}
+
+.teamorga-suggestion-body {
+    padding: 10px 12px;
+    font-size: var(--h4w-font-size-main, 14px);
+    color: var(--to-text);
+    line-height: 1.55;
+}
+
+
+/* ─── Suggestion Review Controls ────────────────────────── */
+
+.teamorga-suggestion-review:not(:empty) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    padding: 8px 12px;
+    border-top: 1px solid var(--to-border);
+    background: var(--to-bg-subtle);
+}
+
+/* ─── Suggestion Edit Form ───────────────────────────────── */
+
+.teamorga-suggestion-editform {
+    padding: 10px 12px;
+    border-top: 1px solid var(--to-border);
+    background: var(--to-bg);
+}
+
+.teamorga-suggestion-editform textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ─── Suggestions Navigation ─────────────────────────────── */
+
+.teamorga-suggestions-nav {
+    padding: 8px 14px 10px;
+    border-top: 1px solid var(--to-border);
+    background: var(--to-bg-subtle);
+}
+
+.teamorga-suggestions-nav-label {
+    font-size: .6875rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--h4w-tcat-color);
+    margin-bottom: 7px;
+    display: block;
+    font-family: var(--to-font);
+}
+
+.teamorga-suggestions-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.teamorga-sug-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    background: var(--h4w-bg-1);
+    border: 1px solid var(--to-border);
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: .75rem;
+    font-weight: 500;
+    color: var(--h4w-fontcolor-main);
+    transition: background var(--to-t), color var(--to-t);
+}
+
+.teamorga-sug-link:hover {
+    background: var(--h4w-highlight-1);
+    border-color: var(--h4w-highlight-1);
+    color: var(--h4w-bg-1);
+    text-decoration: none;
+}
+
+/* ─── "Neuer Vorschlag"-Hinweis ──────────────────────────── */
+
+.teamorga-suggestion-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 14px 10px;
+    font-size: .8125rem;
+    color: var(--to-text-muted);
+    font-family: var(--to-font);
+    font-style: italic;
+    border-top: 1px solid var(--to-border);
+    background: var(--to-bg-subtle);
+}
+
+/* ─── New Reply – Vorschlag-Box ──────────────────────────── */
+
+/* "– optional" label neben dem Abschnitts-Label */
+.teamorga-newreply-optional {
+    font-weight: 400;
+    opacity: .6;
+    font-size: .85em;
+    margin-left: 3px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.teamorga-newreply-hint {
+    font-size: .8125rem;
+    color: var(--to-text-muted);
+    font-style: italic;
+    margin: 0 0 8px;
+    font-family: var(--to-font);
+    line-height: 1.45;
+}
+
+.teamorga-newreply-wrap textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 96px;
+    resize: vertical;
+}
+
+/* ─── Alerts ─────────────────────────────────────────────── */
+
+.teamorga-alerts {
+    margin: 0 0 12px;
+}
+
+.teamorga-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 9px 13px;
+    border-radius: var(--to-radius);
+    margin-bottom: 5px;
+    font-size: .8125rem;
+    color: var(--to-text);
+    font-family: var(--to-font);
+    border: 1px solid var(--to-warning-border);
+    background: var(--to-warning-bg);
+}
+
+.teamorga-alert--success {
+    background: var(--to-success-bg);
+    border-color: var(--to-success-border);
+}
+
+.teamorga-alert--danger {
+    background: var(--to-danger-bg);
+    border-color: var(--to-danger-border);
+}
+
+.teamorga-alert--info {
+    background: var(--to-info-bg);
+    border-color: var(--to-info-border);
+}
+
+.teamorga-alert a {
+    font-weight: 600;
+    color: var(--h4w-linkcolor-main);
+    text-decoration: none;
+    transition: color var(--to-t);
+}
+
+.teamorga-alert a:hover {
+    color: var(--h4w-linkcolor-main-hover);
+    text-decoration: underline;
+}
+
+/* ─── Forum Display Badge ────────────────────────────────── */
+
+/* Block wrapper – forces badge + action onto a new line below username */
+.teamorga-fd-wrap {
+    display: block;
+    margin-top: 3px;
+    line-height: 1;
+}
+
+.teamorga-fd {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    vertical-align: middle;
+    margin-left: 6px;
+    background: var(--h4w-bg-1, #e8eef8);
+    border: 1px solid var(--to-border);
+    border-radius: var(--to-radius-sm);
+    overflow: hidden;
+    font-size: .6875rem;
+    font-family: var(--to-font);
+    white-space: nowrap;
+}
+
+/* Left accent stripe – color comes from priority class */
+.teamorga-fd-prio-stripe {
+    display: block;
+    width: 3px;
+    align-self: stretch;
+    flex-shrink: 0;
+}
+
+.teamorga-fd.teamorga-low      .teamorga-fd-prio-stripe { background: var(--h4w-teamorga-prio-low,    #c8d8f0); }
+.teamorga-fd.teamorga-normal   .teamorga-fd-prio-stripe { background: var(--h4w-teamorga-prio-normal, #b5c6e1); }
+.teamorga-fd.teamorga-medium   .teamorga-fd-prio-stripe { background: var(--h4w-teamorga-prio-medium, #f0c060); }
+.teamorga-fd.teamorga-high     .teamorga-fd-prio-stripe { background: var(--h4w-teamorga-prio-high,   #e07070); }
+.teamorga-fd.teamorga-inactive .teamorga-fd-prio-stripe { background: var(--to-border-strong); }
+
+/* Deadline */
+.teamorga-fd-deadline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    color: var(--to-text-dim);
+    font-weight: 500;
+}
+
+.teamorga-fd-deadline--soon {
+    color: var(--to-warning, #7d5a00);
+    font-weight: 700;
+}
+
+.teamorga-fd-deadline--today {
+    color: var(--to-danger, #a5161a);
+    font-weight: 700;
+}
+
+.teamorga-fd-deadline--overdue {
+    color: var(--to-danger, #a5161a);
+    font-weight: 700;
+    font-style: italic;
+}
+
+/* Divider */
+.teamorga-fd-divider {
+    display: block;
+    width: 1px;
+    align-self: stretch;
+    background: var(--to-border);
+    flex-shrink: 0;
+}
+
+/* Priority label */
+.teamorga-fd-prio-label {
+    padding: 2px 7px;
+    color: var(--to-text-dim);
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+/* User status dot */
+.teamorga-fd-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    flex-shrink: 0;
+    background: var(--to-border-strong);
+}
+
+.teamorga-fd-dot.teamorga-fd-status--approved  { background: var(--to-success,  #198754); }
+.teamorga-fd-dot.teamorga-fd-status--unanswered { background: var(--to-warning-border, #ffd324); }
+.teamorga-fd-dot.teamorga-fd-status--time       { background: var(--to-info,     #1e729a); }
+.teamorga-fd-dot.teamorga-fd-status--abstain    { background: var(--to-border-strong); }
+
+/* Action call-out – shown when user needs to do something */
+.teamorga-fd-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    padding: 2px 8px 2px 6px;
+    background: var(--to-warning-bg, #fff6bf);
+    border: 1px solid var(--to-warning-border, #ffd324);
+    border-radius: var(--to-radius-sm);
+    color: var(--to-warning, #7d5a00);
+    font-size: .6875rem;
+    font-weight: 600;
+    font-family: var(--to-font);
+    vertical-align: middle;
+}
+
+.teamorga-fd-action--urgent {
+    background: var(--to-danger-bg, #fbe3e4);
+    border-color: var(--to-danger-border, #f5c6cb);
+    color: var(--to-danger, #a5161a);
+}
+
+/* dot inside badge (legacy) or dot immediately before an urgent badge */
+.teamorga-fd.teamorga-fd--urgent .teamorga-fd-dot.teamorga-fd-status--unanswered,
+.teamorga-fd-dot.teamorga-fd-status--unanswered:has(+ .teamorga-fd.teamorga-fd--urgent) {
+    background: var(--to-danger, #a5161a);
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+    .teamorga-participant-list {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .teamorga-suggestion-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .teamorga-form-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .teamorga-header-meta {
+        flex-direction: column;
+    }
+
+    .teamorga-meta-item {
+        border-right: none;
+        border-bottom: 1px solid var(--to-border);
+    }
+
+    .teamorga-header-meta > .teamorga-btn {
+        margin-left: 14px;
+        margin-bottom: 8px;
+    }
+}

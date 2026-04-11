@@ -1,0 +1,24 @@
+# Local editor files
+.vscode/
+.idea/
+*.code-workspace
+
+# SFTP config (contains credentials)
+.vscode/sftp.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.sql
+*.stackdump
+
+# Internal docs
+TESTING.md
+DELIVERY_SUMMARY.md
+
+# Forum post file (not code)
+PLUGIN_POST.html

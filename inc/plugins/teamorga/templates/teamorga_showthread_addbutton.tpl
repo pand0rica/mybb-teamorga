@@ -1,0 +1,1 @@
+ <a href="{$add_url}" class="button">Zu Teamorga hinzufügen</a>
