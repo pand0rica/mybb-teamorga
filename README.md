@@ -81,6 +81,8 @@ In the forum thread list, each Teamorga topic shows a compact badge with:
 
 Inactive topics are treated as done and show no pending CTA.
 
+![Forum topic list](docs/screenshots/forumdisplay.png)
+
 #### Submitting suggestions
 
 1. Click **Reply** in the Teamorga thread.
@@ -126,6 +128,7 @@ The forum index shows alerts for:
 
 ## Screenshots
 
+![Forum topic list](docs/screenshots/forumdisplay.png)
 ![Thread panel](docs/screenshots/thread-panel.png)
 ![Suggestion voting](docs/screenshots/suggestion-voting.png)
 
