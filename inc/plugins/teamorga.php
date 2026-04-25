@@ -1496,9 +1496,12 @@ function teamorga_index()
     );
     while ($row = $db->fetch_array($q)) {
         if (teamorga_is_approved((int) $row["tid"])) {
-            $topic_thread = $db->fetch_array($db->simple_select("threads", "subject", "tid=" . (int) $row["tid"]));
-            $subject      = $topic_thread ? htmlspecialchars_uni($topic_thread["subject"]) : "";
-            $threadlink   = get_thread_link((int) $row["tid"]);
+            $topic_thread = $db->fetch_array($db->simple_select("threads", "subject", "tid=" . (int) $row["tid"] . " AND visible = 1"));
+            if (!$topic_thread) {
+                continue;
+            }
+            $subject    = htmlspecialchars_uni($topic_thread["subject"]);
+            $threadlink = get_thread_link((int) $row["tid"]);
             eval("\$alerts .= \"" . $templates->get("teamorga_index_alert_approved") . "\";");
         }
     }
