@@ -28,6 +28,26 @@ if (!isset($mybb->settings["teamorga_enabled"]) || $mybb->settings["teamorga_ena
     }
 }
 
+// The core templates carry Teamorga's variables in every forum (and while the plugin is switched
+// off), its handlers only run in enabled forums: empty defaults first, the handlers overwrite them.
+foreach (["index_start", "newthread_start", "newreply_start", "showthread_start", "forumdisplay_start"] as $teamorga_hook) {
+    $plugins->add_hook($teamorga_hook, "teamorga_template_defaults", 5);
+}
+
+/**
+ * Empty defaults for the template variables Teamorga puts into core templates.
+ */
+function teamorga_template_defaults(): void
+{
+    $names = ["teamorga", "teamorga_newreply_suggestion", "teamorga_showthread", "teamorga_addbutton",
+        "teamorga_index_alerts", "teamorga_forumdisplay"];
+    foreach ($names as $name) {
+        if (!isset($GLOBALS[$name])) {
+            $GLOBALS[$name] = "";
+        }
+    }
+}
+
 // MyAlerts formatter classes – only defined when MyAlerts is loaded
 if (class_exists('MybbStuff_MyAlerts_Formatter_AbstractFormatter')) {
     class TeamorgaTimeProposalFormatter extends MybbStuff_MyAlerts_Formatter_AbstractFormatter
@@ -430,6 +450,9 @@ function teamorga_newthread()
 
     $days_offset      = (int) $mybb->settings["teamorga_deadline_default"];
     $default_deadline = (new DateTime())->modify("+{$days_offset} days")->format("Y-m-d");
+
+    // Preserve a typed suggestion across preview / validation reloads.
+    $teamorga_suggestion_value = htmlspecialchars_uni($mybb->get_input("new_suggestion"));
 
     eval("\$teamorga = \"" . $templates->get("teamorga_inputfields") . "\";");
     eval("\$teamorga_newreply_suggestion = \"" . $templates->get("teamorga_newreply_suggestion") . "\";");
@@ -1094,6 +1117,9 @@ function teamorga_newreply()
         return;
     }
 
+    // Preserve a typed suggestion across preview / validation reloads.
+    $teamorga_suggestion_value = htmlspecialchars_uni($mybb->get_input("new_suggestion"));
+
     $teamorga_ttid = (int) $topic["id"];
     eval("\$teamorga_newreply_suggestion = \"" . $templates->get("teamorga_newreply_suggestion") . "\";");
 }
@@ -1336,7 +1362,11 @@ function teamorga_postbit(&$post)
     // Edit button (owner or privileged)
     $teamorga_edit_button = "";
     if ((int) $suggestion["owner_uid"] === $uid || teamorga_can_always_edit()) {
-        $teamorga_edit_button = '<a href="showthread.php?tid=' . $post["tid"] . '&amp;sug_id=' . $suggestion["id"] . '&amp;teamorga_action=edit_suggestion#pid' . $post["pid"] . '" class="teamorga-edit-link" title="Bearbeiten">&#9998;</a>';
+        // Preserve the current thread page so the edit form stays on the
+        // page where the suggestion actually is (default would be page 1).
+        $current_page = $mybb->get_input("page", MyBB::INPUT_INT);
+        $page_param   = $current_page > 1 ? "&amp;page=" . $current_page : "";
+        $teamorga_edit_button = '<a href="showthread.php?tid=' . $post["tid"] . '&amp;sug_id=' . $suggestion["id"] . '&amp;teamorga_action=edit_suggestion' . $page_param . '#pid' . $post["pid"] . '" class="teamorga-edit-link" title="Bearbeiten">&#9998;</a>';
     }
 
     // Toggle active/inactive button
@@ -1356,6 +1386,9 @@ function teamorga_postbit(&$post)
     // Review controls based on user's current vote
     $teamorga_review_controls = "";
     if ($action === "edit_suggestion" && ((int) $suggestion["owner_uid"] === $uid || teamorga_can_always_edit())) {
+        // Preserve the current thread page for the cancel link.
+        $edit_page      = $mybb->get_input("page", MyBB::INPUT_INT);
+        $teamorga_cancel_page_param = $edit_page > 1 ? "&amp;page=" . $edit_page : "";
         $teamorga_suggestion_text = "";
         eval("\$teamorga_suggestion_text = \"" . $templates->get("teamorga_suggestion_edit_form") . "\";");
         $teamorga_suggestion_author = "";
@@ -1432,26 +1465,6 @@ function teamorga_index()
         $threadlink = get_thread_link((int) $row["tid"]);
         $subject    = htmlspecialchars_uni($row["subject"]);
         eval("\$alerts .= \"" . $templates->get("teamorga_index_alert") . "\";");
-    }
-
-    // Alert: active suggestion still needs review from current user
-    $q = $db->query("
-        SELECT DISTINCT t.subject, t.tid
-        FROM " . TABLE_PREFIX . "teamorga_topic tt
-        JOIN " . TABLE_PREFIX . "threads t ON t.tid = tt.tid
-        JOIN " . TABLE_PREFIX . "teamorga_topic_participants tp ON tp.tt_id = tt.id AND tp.uid = {$uid}
-        JOIN " . TABLE_PREFIX . "teamorga_suggestions s ON s.tt_id = tt.id AND s.active = 1 AND s.pid IS NOT NULL
-        JOIN " . TABLE_PREFIX . "posts po ON po.pid = s.pid
-        JOIN " . TABLE_PREFIX . "teamorga_suggestion_participants p ON p.tt_id = tt.id AND p.sug_id = s.id AND p.uid = {$uid}
-        WHERE p.status = 'pending'
-          AND tp.status != 'abstain'
-          AND tt.prio != 'inactive'
-          AND t.visible = 1
-    ");
-    while ($row = $db->fetch_array($q)) {
-        $threadlink = get_thread_link((int) $row["tid"]);
-        $subject    = htmlspecialchars_uni($row["subject"]);
-        eval("\$alerts .= \"" . $templates->get("teamorga_index_alert_suggestion_pending") . "\";");
     }
 
     // Alert: deadline approaching and user still has pending actions
@@ -1844,7 +1857,10 @@ function teamorga_build_suggestion_links(int $ttid, int $tid): array
                 "cnt"
             );
             $label = $post_num > 0 ? $post_num : $sug_id;
-            $href  = "#pid{$pid}";
+            // Use a full post link so the browser jumps to the correct page,
+            // not just an in-page anchor (which fails when the suggestion is
+            // on a different thread page).
+            $href  = get_post_link($pid, $tid) . "#pid{$pid}";
         } else {
             $label = $sug_id;
             $href  = "showthread.php?tid={$tid}&amp;sug_id={$sug_id}";

@@ -9,7 +9,7 @@
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
 				Speichern
 			</button>
-			<a href="showthread.php?tid={$post['tid']}#pid{$post['pid']}" class="teamorga-btn">Abbrechen</a>
+			<a href="showthread.php?tid={$post['tid']}{$teamorga_cancel_page_param}#pid{$post['pid']}" class="teamorga-btn">Abbrechen</a>
 		</div>
 	</form>
 </div>
