@@ -5,11 +5,9 @@
 		<input type="hidden" name="sug_id" value="{$suggestion['id']}" />
 		<textarea name="suggestion" rows="4">{$suggestion['suggestion']}</textarea>
 		<div class="teamorga-form-actions">
-			<button type="submit" class="teamorga-btn teamorga-btn-approve">
-				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-				Speichern
-			</button>
-			<a href="showthread.php?tid={$post['tid']}{$teamorga_cancel_page_param}#pid{$post['pid']}" class="teamorga-btn">Abbrechen</a>
+			<input type="submit" class="button" value="{$lang->teamorga_save}" />
+			<input type="submit" class="button" form="teamorga_cancel_sug_{$suggestion['id']}" value="{$lang->teamorga_cancel}" />
 		</div>
 	</form>
+	<form method="get" action="showthread.php#pid{$post['pid']}" id="teamorga_cancel_sug_{$suggestion['id']}"><input type="hidden" name="tid" value="{$post['tid']}" />{$teamorga_cancel_page_field}</form>
 </div>

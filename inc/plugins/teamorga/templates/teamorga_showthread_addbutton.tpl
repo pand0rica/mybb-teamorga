@@ -1,1 +1,1 @@
- <a href="{$add_url}" class="button">Zu Teamorga hinzufügen</a>
+ <form method="get" action="showthread.php" class="teamorga-inline-form"><input type="hidden" name="tid" value="{$tid}" /><input type="hidden" name="teamorga_action" value="prepare_add" /><input type="submit" class="button" value="{$lang->teamorga_add_button}" /></form>

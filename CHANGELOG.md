@@ -6,6 +6,24 @@ All notable changes to Teamorga are documented here.
 
 ## [Unreleased]
 
+### Changed
+- **Front end fully translatable.** All 33 templates and every `redirect()`/`error()` message
+  now use language strings (English and German); the language file is loaded once per
+  request in every hook that renders output (`teamorga_load_lang()`). Previously the forum
+  UI was hard-coded German and the English language file only covered alerts.
+- **Action buttons follow the MyBB theme** (dev kit `debugging.md` #22): every action is an
+  `<input type="submit" class="button">` – navigation (add to Teamorga, edit topic, edit
+  suggestion, cancel) via GET forms, state changes via POST forms. The plugin no longer
+  styles its own buttons (`.teamorga-btn*` rules removed); the “More time” toggle is a
+  plain JavaScript button. Participation and time-proposal buttons post
+  `teamorga_status_<status>` / `proposal_accept|proposal_decline`; the old field names are
+  still accepted.
+- Inline styles of the suggestion field moved into the stylesheet.
+- German label “Owner” → “Verantwortlich”, gender-neutral messages.
+
+**Update note:** deactivate and reactivate the plugin so the new templates and stylesheet are
+installed.
+
 ### Fixed
 - **Direct `$mybb->input[...]` access.** All 15 reads of `tid`, `ttid`, `fid`, `sug_id`,
   `kick_uid` and `proposal_uid` now use `$mybb->get_input(..., MyBB::INPUT_INT)`.
