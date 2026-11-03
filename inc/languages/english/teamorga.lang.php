@@ -28,6 +28,10 @@ $l['teamorga_prio_high']          = "High";
 $l['teamorga_prio_inactive']      = "Inactive";
 
 // General
+$l['teamorga_fd_overdue']          = "overdue";
+$l['teamorga_fd_today']            = "Today!";
+$l['teamorga_fd_in_one_day']       = "in 1 day";
+$l['teamorga_fd_in_days']          = "in {1} days";
 $l['teamorga_deadline']           = "Deadline";
 $l['teamorga_priority']           = "Priority";
 $l['teamorga_owner']              = "Owner";

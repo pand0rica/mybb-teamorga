@@ -28,9 +28,13 @@ $l['teamorga_alert_vote']            = "{1} hat auf deinen Vorschlag reagiert.";
 $l['teamorga_alert_vote_approved']   = "{1} hat deinem Vorschlag zugestimmt.";
 $l['teamorga_alert_vote_disapproved']= "{1} wünscht eine Änderung deines Vorschlags.";
 
+$l['teamorga_fd_overdue']          = "überfällig";
+$l['teamorga_fd_today']            = "Heute!";
+$l['teamorga_fd_in_one_day']       = "in 1 Tag";
+$l['teamorga_fd_in_days']          = "in {1} Tagen";
 $l['teamorga_deadline']           = "Deadline";
 $l['teamorga_priority']           = "Priorität";
 $l['teamorga_owner']              = "Owner";
 $l['teamorga_no_owner']           = "keine";
-$l['teamorga_participants']       = "Teilnehmer";
+$l['teamorga_participants']       = "Teilnehmende";
 $l['teamorga_suggestions']        = "Vorschläge";

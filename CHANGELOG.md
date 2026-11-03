@@ -4,6 +4,23 @@ All notable changes to Teamorga are documented here.
 
 ---
 
+## [Unreleased]
+
+### Fixed
+- **Direct `$mybb->input[...]` access.** All 15 reads of `tid`, `ttid`, `fid`, `sug_id`,
+  `kick_uid` and `proposal_uid` now use `$mybb->get_input(..., MyBB::INPUT_INT)`.
+- **`global $lang` declared mid-function** in `teamorga_forumdisplay()`; moved to the
+  top. The language file is now loaded there, so the priority label no longer falls back
+  to the raw key.
+- **Hard-coded German deadline labels** in the forum list (“überfällig”, “Heute!”,
+  “in X Tagen”) moved to the language files (`teamorga_fd_*`, en + de).
+- Integer columns in the stylesheet queries of `teamorga_activate()` are no longer quoted.
+
+### Changed
+- German label “Teilnehmer” → “Teilnehmende”.
+- Added `.claudeignore`. README: install step, optional MyAlerts integration and the
+  “Änderung erwünscht” vote are now documented correctly.
+
 ## [1.2.0] – 2026-04-11
 
 ### Added
