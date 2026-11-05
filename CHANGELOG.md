@@ -7,6 +7,14 @@ All notable changes to Teamorga are documented here.
 ## [Unreleased]
 
 ### Changed
+- **Settings follow the forum language.** New admin language files (English, German)
+  provide `setting_group_teamorga` / `setting_teamorga_*`; they are loaded on the ACP
+  settings page. The texts stored at install time are English now (fallback).
+
+### Removed
+- `bug.PNG` (debug screenshot) from the repository root.
+
+### Changed
 - **Front end fully translatable.** All 33 templates and every `redirect()`/`error()` message
   now use language strings (English and German); the language file is loaded once per
   request in every hook that renders output (`teamorga_load_lang()`). Previously the forum

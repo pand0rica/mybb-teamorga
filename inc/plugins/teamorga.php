@@ -11,6 +11,11 @@ if (!defined("IN_MYBB")) {
     die("Direct initialization of this file is not allowed.");
 }
 
+// ACP: settings titles/descriptions from the admin language file (setting_teamorga_*)
+if (defined("IN_ADMINCP")) {
+    $plugins->add_hook("admin_config_settings_begin", "teamorga_admin_settings_lang");
+}
+
 // Only register hooks when the plugin is enabled (setting may not exist before install)
 if (!isset($mybb->settings["teamorga_enabled"]) || $mybb->settings["teamorga_enabled"]) {
     $plugins->add_hook("index_start", "teamorga_index");
@@ -136,6 +141,16 @@ function teamorga_load_lang()
     return $lang;
 }
 
+/**
+ * Loads the admin language file on the settings page so MyBB shows the
+ * setting_group_teamorga / setting_teamorga_* strings in the forum language.
+ */
+function teamorga_admin_settings_lang(): void
+{
+    global $lang;
+    $lang->load("teamorga");
+}
+
 function teamorga_info()
 {
     return [
@@ -158,7 +173,7 @@ function teamorga_install()
     $setting_gid = $db->insert_query("settinggroups", [
         "name"        => "teamorga",
         "title"       => "Teamorga",
-        "description" => "Teamorganisation",
+        "description" => "Settings for Teamorga (team coordination with deadlines, participation and voting).",
         "disporder"   => 50,
         "isdefault"   => 0
     ]);
@@ -166,50 +181,50 @@ function teamorga_install()
     $settings = [
         [
             "name"        => "teamorga_enabled",
-            "title"       => "Aktiviert?",
-            "description" => "Das Plugin kann hier aktiviert oder deaktiviert werden.",
+            "title"       => "Enabled?",
+            "description" => "Turn the plugin on or off.",
             "optionscode" => "onoff",
             "value"       => "1"
         ],
         [
             "name"        => "teamorga_forums",
-            "title"       => "Foren",
-            "description" => "In welchen Foren ist das Plugin verfügbar? Wähle -1 für alle.",
+            "title"       => "Forums",
+            "description" => "Forums in which Teamorga is available. Select “All forums” for every forum; no selection = none.",
             "optionscode" => "forumselect",
             "value"       => ""
         ],
         [
             "name"        => "teamorga_groups",
-            "title"       => "Gruppen",
-            "description" => "Für welche Gruppen ist das Plugin in den ausgewählten Foren aktiviert? Wähle -1 für alle.",
+            "title"       => "Groups",
+            "description" => "User groups that take part in Teamorga in the selected forums. Select “All groups” for everyone; no selection = none.",
             "optionscode" => "groupselect",
             "value"       => "3,4,6"
         ],
         [
             "name"        => "teamorga_edit_groups",
-            "title"       => "Editier-Gruppen",
-            "description" => "Welche Gruppen dürfen Vorschläge immer bearbeiten, auch wenn sie nicht der Ersteller sind?",
+            "title"       => "Editor groups",
+            "description" => "Groups that may always edit topics and suggestions, even if they did not create them.",
             "optionscode" => "groupselect",
             "value"       => "3,4,6"
         ],
         [
             "name"        => "teamorga_deadline_default",
-            "title"       => "Standard-Deadline (Tage)",
-            "description" => "Wie viele Tage nach heute soll die Deadline beim Erstellen eines Teamorga-Themas standardmäßig gesetzt werden?",
+            "title"       => "Default deadline (days)",
+            "description" => "How many days from today the deadline is preset when a Teamorga topic is created.",
             "optionscode" => "numeric",
             "value"       => "14"
         ],
         [
             "name"        => "teamorga_memo_default",
-            "title"       => "Erinnerungs-Vorlauf (Tage)",
-            "description" => "Wie viele Tage vor der Deadline soll auf dem Index eine Erinnerung erscheinen?",
+            "title"       => "Reminder lead time (days)",
+            "description" => "How many days before the deadline a reminder appears on the forum index.",
             "optionscode" => "numeric",
             "value"       => "3"
         ],
         [
             "name"        => "teamorga_id",
-            "title"       => "Teamaccount-ID",
-            "description" => "UID eines gemeinsam genutzten Teamaccounts. Dieser kann Themen erstellen, wird aber nicht als Abstimmender gewertet.",
+            "title"       => "Team account ID",
+            "description" => "UID of a shared team account. It can create topics but does not count as a voter.",
             "optionscode" => "numeric",
             "value"       => "0"
         ]
