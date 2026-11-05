@@ -397,7 +397,7 @@ details.teamorga-suggestion-box > summary::-webkit-details-marker {
 
 /* Collapsed indicator in the author span */
 details.teamorga-suggestion-box > summary .teamorga-suggestion-author::before {
-    content: 'B6';
+    content: '\25B6';
     font-size: .65em;
     margin-right: 6px;
     opacity: .7;
