@@ -183,14 +183,14 @@ function teamorga_install()
             "title"       => "Gruppen",
             "description" => "Für welche Gruppen ist das Plugin in den ausgewählten Foren aktiviert? Wähle -1 für alle.",
             "optionscode" => "groupselect",
-            "value"       => ""
+            "value"       => "3,4,6"
         ],
         [
             "name"        => "teamorga_edit_groups",
             "title"       => "Editier-Gruppen",
             "description" => "Welche Gruppen dürfen Vorschläge immer bearbeiten, auch wenn sie nicht der Ersteller sind?",
             "optionscode" => "groupselect",
-            "value"       => ""
+            "value"       => "3,4,6"
         ],
         [
             "name"        => "teamorga_deadline_default",
@@ -1602,8 +1602,13 @@ function teamorga_is_forum_enabled($fid = null)
 {
     global $mybb, $db;
 
-    if (empty($mybb->settings["teamorga_forums"]) || $mybb->settings["teamorga_forums"] == -1) {
+    // MyBB forumselect: "-1" = all forums, "" = none (Teamorga stays off until forums are chosen).
+    $forums = trim((string)($mybb->settings["teamorga_forums"] ?? ""));
+    if ($forums === "-1") {
         return true;
+    }
+    if ($forums === "") {
+        return false;
     }
 
     if ($fid === null) {
@@ -1630,7 +1635,9 @@ function teamorga_is_group_allowed($uid = null)
 {
     global $mybb;
 
-    if (empty($mybb->settings["teamorga_groups"]) || $mybb->settings["teamorga_groups"] == -1) {
+    // MyBB groupselect: "-1" = all groups, "" = no group (only the team account below).
+    $groups = trim((string)($mybb->settings["teamorga_groups"] ?? ""));
+    if ($groups === "-1") {
         return true;
     }
 
@@ -1665,8 +1672,13 @@ function teamorga_can_always_edit()
 {
     global $mybb;
 
-    if (empty($mybb->settings["teamorga_edit_groups"]) || $mybb->settings["teamorga_edit_groups"] == -1) {
+    // MyBB groupselect: "-1" = all groups, "" = no group (everyone edits only their own).
+    $edit_groups = trim((string)($mybb->settings["teamorga_edit_groups"] ?? ""));
+    if ($edit_groups === "-1") {
         return true;
+    }
+    if ($edit_groups === "") {
+        return false;
     }
 
     $allowed    = array_map("intval", explode(",", $mybb->settings["teamorga_edit_groups"]));
@@ -1828,16 +1840,16 @@ function teamorga_add_participants(int $ttid, int $organizer_uid): void
 
     $setting = trim($mybb->settings["teamorga_groups"] ?? "");
 
-    // Collect positive group IDs; -1 or empty means "all groups allowed"
+    // Collect positive group IDs; -1 means "all groups", empty means "no group" (organizer only)
     $groups = array_values(array_filter(
         array_map("intval", explode(",", $setting)),
         function ($g) { return $g > 0; }
     ));
 
-    $all_allowed = ($setting === "" || $setting === "-1" || in_array(-1, array_map("intval", explode(",", $setting)), true));
+    $all_allowed = ($setting === "-1" || in_array(-1, array_map("intval", explode(",", $setting)), true));
 
     if ($all_allowed && empty($groups)) {
-        // -1 / empty = all users are team members – fetch everyone
+        // -1 = all users are team members – fetch everyone
         $query = $db->query("SELECT uid FROM " . TABLE_PREFIX . "users WHERE uid > 0");
     } elseif (!empty($groups)) {
         $group_list = implode(",", $groups);

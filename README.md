@@ -27,9 +27,9 @@ Teamorga helps teams coordinate decisions in the forum. Threads can be marked as
 | Setting | Description |
 |---|---|
 | **Enabled** | Enable or disable the plugin globally. |
-| **Forums** | Which forums the plugin applies to. |
-| **Groups** | Which user groups can use Teamorga. Set to `-1` for all groups. |
-| **Editor Groups** | Which groups may edit any suggestion (not just their own). |
+| **Forums** | Which forums the plugin applies to. *All* (`-1`) = every forum, *None* (empty) = Teamorga is off until forums are selected. |
+| **Groups** | Which user groups can use Teamorga. Set to `-1` for all groups; empty = no group (only the team account). Default: Super Moderators, Administrators, Moderators. |
+| **Editor Groups** | Which groups may edit any suggestion (not just their own). `-1` = all, empty = nobody (everyone edits only their own). Default: Super Moderators, Administrators, Moderators. |
 | **Default Deadline (days)** | Pre-filled deadline offset when creating a new topic. |
 | **Reminder Lead (days)** | How many days before deadline a reminder appears on the index. |
 | **Team Account ID** | UID of a shared team account that can create topics but is not counted as a voter. |

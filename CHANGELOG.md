@@ -23,6 +23,7 @@ All notable changes to Teamorga are documented here.
 
 **Update note:** deactivate and reactivate the plugin so the new templates and stylesheet are
 installed.
+- New installations default *Groups* and *Editor Groups* to Super Moderators, Administrators and Moderators (3, 4, 6). **Upgrade note:** if you left *Forums* or *Groups* empty to mean “all”, set them to *All* in the settings after updating.
 
 ### Fixed
 - **Direct `$mybb->input[...]` access.** All 15 reads of `tid`, `ttid`, `fid`, `sug_id`,
@@ -33,6 +34,7 @@ installed.
 - **Hard-coded German deadline labels** in the forum list (“überfällig”, “Heute!”,
   “in X Tagen”) moved to the language files (`teamorga_fd_*`, en + de).
 - Integer columns in the stylesheet queries of `teamorga_activate()` are no longer quoted.
+- Empty *Forums*, *Groups* and *Editor Groups* settings meant “all” in the code although the setting descriptions say “-1 for all”. On a fresh install (all three empty) every member therefore saw the Teamorga fields in every forum, could edit every suggestion, and every user became a participant of new topics. Now MyBB's meaning applies: `-1` (*All*) = all, empty (*None*) = none – no forum, no group (only the team account), nobody may edit other people's suggestions, only the organizer is added as participant.
 
 ### Changed
 - German label “Teilnehmer” → “Teilnehmende”.
