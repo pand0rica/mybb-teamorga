@@ -1462,12 +1462,13 @@ function teamorga_postbit(&$post)
     $teamorga_toggle_suggestion_button = "";
     if (teamorga_can_toggle_suggestion($suggestion, $uid)) {
         $is_active = !empty($suggestion["active"]);
+        // The two fragments end up inside a value="" attribute: no template HTML comments.
         if ($is_active) {
             $title = htmlspecialchars_uni($lang->teamorga_suggestion_deactivate_title);
-            eval("\$toggle_btn_content = \"" . $templates->get("teamorga_suggestion_toggle_inactive") . "\";");
+            eval("\$toggle_btn_content = \"" . $templates->get("teamorga_suggestion_toggle_inactive", 1, 0) . "\";");
         } else {
             $title = htmlspecialchars_uni($lang->teamorga_suggestion_activate_title);
-            eval("\$toggle_btn_content = \"" . $templates->get("teamorga_suggestion_toggle_active") . "\";");
+            eval("\$toggle_btn_content = \"" . $templates->get("teamorga_suggestion_toggle_active", 1, 0) . "\";");
         }
         eval("\$teamorga_toggle_suggestion_button = \"" . $templates->get("teamorga_suggestion_toggle") . "\";");
     }
