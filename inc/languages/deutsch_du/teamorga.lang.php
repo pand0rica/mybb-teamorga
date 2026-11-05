@@ -105,3 +105,7 @@ $l['teamorga_err_no_permission'] = 'Keine Berechtigung.';
 $l['teamorga_err_invalid_vote'] = 'Ungültige Bewertungsauswahl.';
 $l['teamorga_err_not_participant'] = 'Du bist für diesen Vorschlag nicht als teilnehmende Person eingetragen.';
 $l['teamorga_msg_vote_saved'] = 'Bewertung gespeichert.';
+
+// UCP alert settings (alerts.php?action=settings)
+$l['myalerts_setting_teamorga_suggestion_vote'] = "Möchtest du eine Benachrichtigung, wenn jemand auf deinen Vorschlag reagiert?";
+$l['myalerts_setting_teamorga_time_proposal']   = "Möchtest du eine Benachrichtigung, wenn jemand eine neue Deadline vorschlägt?";

@@ -6,6 +6,12 @@ All notable changes to Teamorga are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- **`{$post['teamorga']}` undefined in PMs, previews and announcements.** Every postbit flavour now gets an empty default.
+- **Alert types missing in the UCP alert settings** while the plugin is switched off: the labels (`myalerts_setting_teamorga_*`, English and German) are loaded via `myalerts_load_lang`.
+- **Priority label text colour** in the forum display was overridden by the dim label colour.
+- The `▶` pseudo-element content is written as a CSS escape.
+
 ### Changed
 - **Settings follow the forum language.** New admin language files (English, German)
   provide `setting_group_teamorga` / `setting_teamorga_*`; they are loaded on the ACP

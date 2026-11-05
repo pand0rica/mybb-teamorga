@@ -397,7 +397,7 @@ details.teamorga-suggestion-box > summary::-webkit-details-marker {
 
 /* Collapsed indicator in the author span */
 details.teamorga-suggestion-box > summary .teamorga-suggestion-author::before {
-    content: '▶';
+    content: 'B6';
     font-size: .65em;
     margin-right: 6px;
     opacity: .7;
@@ -664,6 +664,13 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     font-weight: 600;
     letter-spacing: .02em;
 }
+
+/* The label also carries .teamorga-<prio>: keep that pill's text colour,
+   otherwise the dim label colour lands on the pill background */
+.teamorga-fd-prio-label.teamorga-low    { color: var(--to-prio-low-color); }
+.teamorga-fd-prio-label.teamorga-normal { color: var(--to-accent-hover); }
+.teamorga-fd-prio-label.teamorga-medium { color: var(--to-prio-medium-color); }
+.teamorga-fd-prio-label.teamorga-high   { color: var(--to-prio-high-color); }
 
 /* User status dot */
 .teamorga-fd-dot {

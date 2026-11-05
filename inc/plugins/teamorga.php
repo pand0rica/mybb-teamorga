@@ -39,6 +39,15 @@ foreach (["index_start", "newthread_start", "newreply_start", "showthread_start"
     $plugins->add_hook($teamorga_hook, "teamorga_template_defaults", 5);
 }
 
+// {$post['teamorga']} in the postbit templates: empty for PMs, previews, announcements and
+// while the plugin is switched off; teamorga_postbit() fills it for normal posts
+foreach (["postbit", "postbit_prev", "postbit_pm", "postbit_announcement"] as $teamorga_hook) {
+    $plugins->add_hook($teamorga_hook, "teamorga_postbit_default", 5);
+}
+
+// The alert types stay in the UCP alert settings even while the plugin is switched off
+$plugins->add_hook("myalerts_load_lang", "teamorga_myalerts_load_lang");
+
 /**
  * Empty defaults for the template variables Teamorga puts into core templates.
  */
@@ -1231,6 +1240,28 @@ function teamorga_on_post_insert(&$post)
             "sug_id" => (int) $suggestion_id,
             "status" => ($participant_uid === $poster_uid) ? "approved" : "pending"
         ]);
+    }
+}
+
+/**
+ * Empty {$post['teamorga']} for every postbit flavour (see the hooks at the top of the file).
+ */
+function teamorga_postbit_default(&$post)
+{
+    if (!isset($post["teamorga"])) {
+        $post["teamorga"] = "";
+    }
+}
+
+/**
+ * Labels for the alert types in the UCP alert settings (alerts.php?action=settings).
+ */
+function teamorga_myalerts_load_lang()
+{
+    global $lang;
+
+    if (!isset($lang->myalerts_setting_teamorga_suggestion_vote)) {
+        $lang->load('teamorga');
     }
 }
 
