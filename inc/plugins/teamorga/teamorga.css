@@ -24,22 +24,23 @@
     --to-accent-dim:     #d0dde8;
     --to-accent-hover:   #1a3e60;
 
-    /* Status colours – Bootstrap 3 style (same base as MyBB default) */
-    --to-success:        #3c763d;
-    --to-success-bg:     #dff0d8;
-    --to-success-border: #d6e9c6;
+    /* Semantische Zustaende */
+    --to-success:        var(--h4w-teamorga-status-approved, #198754);
+    --to-success-bg:     var(--h4w-alert-green-bgcolor,  #ebfcdf);
+    --to-success-border: var(--h4w-alert-green-bordercolor, #b7dca8);
 
-    --to-warning:        #8a6d3b;
-    --to-warning-bg:     #fcf8e3;
-    --to-warning-border: #faebcc;
+    --to-warning:        var(--h4w-teamorga-warning-text, #7d5a00);
+    --to-warning-hover:  var(--h4w-teamorga-warning-hover, #d4a017);
+    --to-warning-bg:     var(--h4w-alert-yellow-bgcolor,      #FFF6BF);
+    --to-warning-border: var(--h4w-alert-yellow-bordercolor,  #FFD324);
 
-    --to-danger:         #a94442;
-    --to-danger-bg:      #f2dede;
-    --to-danger-border:  #ebccd1;
+    --to-danger:         var(--h4w-alert-red-fontcolor, #A5161A);
+    --to-danger-bg:      var(--h4w-alert-red-bgcolor,   #FBE3E4);
+    --to-danger-border:  var(--h4w-alert-red-bordercolor, #f5c6cb);
 
-    --to-info:           #31708f;
-    --to-info-bg:        #d9edf7;
-    --to-info-border:    #bce8f1;
+    --to-info:           var(--h4w-alert-blue-fontcolor, #1e729a);
+    --to-info-bg:        var(--h4w-alert-blue-bgcolor,   #e3f5fb);
+    --to-info-border:    var(--h4w-alert-blue-bordercolor, #bee5eb);
 
     /* Shape */
     --to-radius:         3px;
@@ -189,11 +190,14 @@
     letter-spacing: .03em;
 }
 
-.teamorga-low      { background: var(--to-prio-low-bg);      color: var(--to-prio-low-color);    }
-.teamorga-normal   { background: var(--to-accent-dim);        color: var(--to-accent-hover);      }
-.teamorga-medium   { background: var(--to-prio-medium-bg);    color: var(--to-prio-medium-color); }
-.teamorga-high     { background: var(--to-prio-high-bg);      color: var(--to-prio-high-color);   }
-.teamorga-inactive { background: var(--to-prio-inactive-bg);  color: var(--to-text-muted); text-decoration: line-through; }
+/* Prio colours use the teambereich bg/color pairs, which every design tunes
+   for its own light/dark palette (the teamorga-prio-* tokens are light-only) */
+.teamorga-low      { background: var(--h4w-teambereich-low-bg);    color: var(--h4w-teambereich-low-color);    }
+.teamorga-normal   { background: color-mix(in srgb, var(--h4w-highlight-1) 22%, transparent); color: var(--to-text); }
+.teamorga-medium   { background: var(--h4w-teambereich-medium-bg); color: var(--h4w-teambereich-medium-color); }
+.teamorga-high     { background: var(--h4w-teambereich-high-bg);   color: var(--h4w-teambereich-high-color);   }
+.teamorga-inactive { background: transparent; color: var(--to-text-muted); text-decoration: line-through; }
+
 
 /* ─── Time proposal ─────────────────────────────────────── */
 
@@ -665,12 +669,12 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     letter-spacing: .02em;
 }
 
-/* The label also carries .teamorga-<prio>: keep that pill's text colour,
-   otherwise the dim label colour lands on the pill background */
-.teamorga-fd-prio-label.teamorga-low    { color: var(--to-prio-low-color); }
-.teamorga-fd-prio-label.teamorga-normal { color: var(--to-accent-hover); }
-.teamorga-fd-prio-label.teamorga-medium { color: var(--to-prio-medium-color); }
-.teamorga-fd-prio-label.teamorga-high   { color: var(--to-prio-high-color); }
+/* Label also carries .teamorga-<prio>: keep that pill's text colour,
+   otherwise light text-dim lands on the pill background */
+.teamorga-fd-prio-label.teamorga-low    { color: var(--h4w-teambereich-low-color); }
+.teamorga-fd-prio-label.teamorga-normal { color: var(--to-text); }
+.teamorga-fd-prio-label.teamorga-medium { color: var(--h4w-teambereich-medium-color); }
+.teamorga-fd-prio-label.teamorga-high   { color: var(--h4w-teambereich-high-color); }
 
 /* User status dot */
 .teamorga-fd-dot {
@@ -681,13 +685,13 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     margin-right: 6px;
     vertical-align: middle;
     flex-shrink: 0;
-    background: var(--to-border-strong);
+    background: var(--to-text-muted);
 }
 
-.teamorga-fd-dot.teamorga-fd-status--approved  { background: var(--to-success);        }
-.teamorga-fd-dot.teamorga-fd-status--unanswered { background: var(--to-warning-border); }
-.teamorga-fd-dot.teamorga-fd-status--time       { background: var(--to-info);           }
-.teamorga-fd-dot.teamorga-fd-status--abstain    { background: var(--to-border-strong);  }
+.teamorga-fd-dot.teamorga-fd-status--approved  { background: var(--to-success,  #198754); }
+.teamorga-fd-dot.teamorga-fd-status--unanswered { background: var(--to-warning-border, #ffd324); }
+.teamorga-fd-dot.teamorga-fd-status--time       { background: var(--to-info,     #1e729a); }
+.teamorga-fd-dot.teamorga-fd-status--abstain    { background: var(--to-text-muted); }
 
 /* Action call-out – shown when user needs to do something */
 .teamorga-fd-action {
