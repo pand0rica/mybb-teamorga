@@ -1,28 +1,27 @@
 /* ============================================================
    Teamorga – Design System
-   Works on any standard MyBB theme.
-   Override the --to-* variables in your theme CSS to adapt colours.
+   Integriert in das h4w-Forum-Design via --h4w-* Variablen
    ============================================================ */
 
 :root {
-    /* Backgrounds – neutral grays matching MyBB default theme */
-    --to-bg:             #f5f5f5;
-    --to-bg-subtle:      #ebebeb;
-    --to-bg-inset:       #e0e0e0;
+    /* Backgrounds */
+    --to-bg:             var(--h4w-teamorga-color-bg-white, #f5f5f5);
+    --to-bg-subtle:      var(--h4w-teamorga-color-bg-light, #ebebeb);
+    --to-bg-inset:       var(--h4w-bg-1, #e0e0e0);
 
     /* Borders */
-    --to-border:         #ddd;
-    --to-border-strong:  #bbb;
+    --to-border:         var(--h4w-bg-1, #ddd);
+    --to-border-strong:  var(--h4w-teamorga-color-border-dark, #bbb);
 
     /* Text */
-    --to-text:           #333;
-    --to-text-dim:       #666;
-    --to-text-muted:     #888;
+    --to-text:           var(--h4w-fontcolor-main, #333);
+    --to-text-dim:       var(--h4w-teamorga-color-gray-text, #666);
+    --to-text-muted:     var(--h4w-teamorga-color-gray-medium, #888);
 
-    /* Accent – moderate blue, neutral across themes */
-    --to-accent:         #366a9f;
-    --to-accent-dim:     #d0dde8;
-    --to-accent-hover:   #1a3e60;
+    /* Accent */
+    --to-accent:         var(--h4w-highlight-1, #366a9f);
+    --to-accent-dim:     var(--h4w-teamorga-prio-normal, #d0dde8);
+    --to-accent-hover:   var(--h4w-highlight-2, #1a3e60);
 
     /* Semantische Zustaende */
     --to-success:        var(--h4w-teamorga-status-approved, #198754);
@@ -43,8 +42,8 @@
     --to-info-border:    var(--h4w-alert-blue-bordercolor, #bee5eb);
 
     /* Shape */
-    --to-radius:         3px;
-    --to-radius-sm:      2px;
+    --to-radius:         4px;
+    --to-radius-sm:      3px;
 
     /* Shadow */
     --to-shadow:         none;
@@ -58,38 +57,38 @@
     --to-font-size:      14px;
 
     /* Table header – dark gray like MyBB default thead */
-    --to-thead-bg:       #555;
-    --to-thead-color:    #fff;
+    --to-thead-bg:       var(--h4w-thead-bg, #555);
+    --to-thead-color:    var(--h4w-thead-color, #fff);
     --to-thead-border:   1px solid #444;
 
     /* Priority badge colours */
-    --to-prio-low-bg:    #e8f0f8;
-    --to-prio-low-color: #366a9f;
-    --to-prio-medium-bg:    #fcf8e3;
-    --to-prio-medium-color: #8a6d3b;
-    --to-prio-high-bg:    #f2dede;
-    --to-prio-high-color: #a94442;
-    --to-prio-inactive-bg: #e8e8e8;
+    --to-prio-low-bg:    var(--h4w-teambereich-low-bg, #e8f0f8);
+    --to-prio-low-color: var(--h4w-teambereich-low-color, #366a9f);
+    --to-prio-medium-bg:    var(--h4w-teambereich-medium-bg, #fcf8e3);
+    --to-prio-medium-color: var(--h4w-teambereich-medium-color, #8a6d3b);
+    --to-prio-high-bg:    var(--h4w-teambereich-high-bg, #f2dede);
+    --to-prio-high-color: var(--h4w-teambereich-high-color, #a94442);
+    --to-prio-inactive-bg: var(--h4w-teamorga-prio-inactive, #e8e8e8);
 
     /* Form inputs */
-    --to-input-border:   #ccc;
-    --to-input-bg:       #fff;
-    --to-input-color:    #333;
+    --to-input-border:   var(--h4w-select-bordercolor, #ccc);
+    --to-input-bg:       var(--h4w-select-bg, #fff);
+    --to-input-color:    var(--h4w-textarea-color, #333);
 
     /* Category / section label colour */
-    --to-label-color:    #777;
+    --to-label-color:    var(--h4w-text-muted, #777);
 
     /* Generic button */
-    --to-btn-bg:         #f5f5f5;
-    --to-btn-hover-bg:   #e8e8e8;
+    --to-btn-bg:         var(--h4w-teamorga-btn-bg, #f5f5f5);
+    --to-btn-hover-bg:   var(--h4w-teamorga-btn-hover, #e8e8e8);
 
     /* "Add" action button */
-    --to-btn-add-bg:     #555;
-    --to-btn-add-color:  #fff;
+    --to-btn-add-bg:     var(--h4w-button-bg, #555);
+    --to-btn-add-color:  var(--h4w-button-color, #fff);
 
     /* Links inside alerts */
-    --to-link:           #366a9f;
-    --to-link-hover:     #1a3e60;
+    --to-link:           var(--h4w-linkcolor-main, #366a9f);
+    --to-link-hover:     var(--h4w-linkcolor-main-hover, #1a3e60);
 }
 
 /* ─── Card ───────────────────────────────────────────────── */
@@ -520,7 +519,7 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 .teamorga-sug-link:hover {
     background: var(--to-accent);
     border-color: var(--to-accent);
-    color: #fff;
+    color: var(--h4w-text-on-accent, #fff);
     text-decoration: none;
 }
 
