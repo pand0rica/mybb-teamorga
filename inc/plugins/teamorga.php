@@ -1941,7 +1941,7 @@ function teamorga_add_participants(int $ttid, int $organizer_uid): void
  */
 function teamorga_build_suggestion_links(int $ttid, int $tid): array
 {
-    global $db;
+    global $db, $lang;
 
     $entries = [];
     $q = $db->query("
