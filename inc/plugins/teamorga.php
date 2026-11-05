@@ -11,6 +11,11 @@ if (!defined("IN_MYBB")) {
     die("Direct initialization of this file is not allowed.");
 }
 
+// ACP: settings titles/descriptions from the admin language file (setting_teamorga_*)
+if (defined("IN_ADMINCP")) {
+    $plugins->add_hook("admin_config_settings_begin", "teamorga_admin_settings_lang");
+}
+
 // Only register hooks when the plugin is enabled (setting may not exist before install)
 if (!isset($mybb->settings["teamorga_enabled"]) || $mybb->settings["teamorga_enabled"]) {
     $plugins->add_hook("index_start", "teamorga_index");
@@ -120,6 +125,32 @@ if (class_exists('MybbStuff_MyAlerts_Formatter_AbstractFormatter')) {
 // PLUGIN INFO / INSTALL / UNINSTALL
 // ============================================================================
 
+/**
+ * Lädt die Sprachdatei einmal pro Request und gibt das $lang-Objekt zurück.
+ */
+function teamorga_load_lang()
+{
+    global $lang;
+    static $loaded = false;
+
+    if (!$loaded) {
+        $lang->load('teamorga');
+        $loaded = true;
+    }
+
+    return $lang;
+}
+
+/**
+ * Loads the admin language file on the settings page so MyBB shows the
+ * setting_group_teamorga / setting_teamorga_* strings in the forum language.
+ */
+function teamorga_admin_settings_lang(): void
+{
+    global $lang;
+    $lang->load("teamorga");
+}
+
 function teamorga_info()
 {
     return [
@@ -142,7 +173,7 @@ function teamorga_install()
     $setting_gid = $db->insert_query("settinggroups", [
         "name"        => "teamorga",
         "title"       => "Teamorga",
-        "description" => "Teamorganisation",
+        "description" => "Settings for Teamorga (team coordination with deadlines, participation and voting).",
         "disporder"   => 50,
         "isdefault"   => 0
     ]);
@@ -150,50 +181,50 @@ function teamorga_install()
     $settings = [
         [
             "name"        => "teamorga_enabled",
-            "title"       => "Aktiviert?",
-            "description" => "Das Plugin kann hier aktiviert oder deaktiviert werden.",
+            "title"       => "Enabled?",
+            "description" => "Turn the plugin on or off.",
             "optionscode" => "onoff",
             "value"       => "1"
         ],
         [
             "name"        => "teamorga_forums",
-            "title"       => "Foren",
-            "description" => "In welchen Foren ist das Plugin verfügbar? Wähle -1 für alle.",
+            "title"       => "Forums",
+            "description" => "Forums in which Teamorga is available. Select “All forums” for every forum; no selection = none.",
             "optionscode" => "forumselect",
             "value"       => ""
         ],
         [
             "name"        => "teamorga_groups",
-            "title"       => "Gruppen",
-            "description" => "Für welche Gruppen ist das Plugin in den ausgewählten Foren aktiviert? Wähle -1 für alle.",
+            "title"       => "Groups",
+            "description" => "User groups that take part in Teamorga in the selected forums. Select “All groups” for everyone; no selection = none.",
             "optionscode" => "groupselect",
-            "value"       => ""
+            "value"       => "3,4,6"
         ],
         [
             "name"        => "teamorga_edit_groups",
-            "title"       => "Editier-Gruppen",
-            "description" => "Welche Gruppen dürfen Vorschläge immer bearbeiten, auch wenn sie nicht der Ersteller sind?",
+            "title"       => "Editor groups",
+            "description" => "Groups that may always edit topics and suggestions, even if they did not create them.",
             "optionscode" => "groupselect",
-            "value"       => ""
+            "value"       => "3,4,6"
         ],
         [
             "name"        => "teamorga_deadline_default",
-            "title"       => "Standard-Deadline (Tage)",
-            "description" => "Wie viele Tage nach heute soll die Deadline beim Erstellen eines Teamorga-Themas standardmäßig gesetzt werden?",
+            "title"       => "Default deadline (days)",
+            "description" => "How many days from today the deadline is preset when a Teamorga topic is created.",
             "optionscode" => "numeric",
             "value"       => "14"
         ],
         [
             "name"        => "teamorga_memo_default",
-            "title"       => "Erinnerungs-Vorlauf (Tage)",
-            "description" => "Wie viele Tage vor der Deadline soll auf dem Index eine Erinnerung erscheinen?",
+            "title"       => "Reminder lead time (days)",
+            "description" => "How many days before the deadline a reminder appears on the forum index.",
             "optionscode" => "numeric",
             "value"       => "3"
         ],
         [
             "name"        => "teamorga_id",
-            "title"       => "Teamaccount-ID",
-            "description" => "UID eines gemeinsam genutzten Teamaccounts. Dieser kann Themen erstellen, wird aber nicht als Abstimmender gewertet.",
+            "title"       => "Team account ID",
+            "description" => "UID of a shared team account. It can create topics but does not count as a voter.",
             "optionscode" => "numeric",
             "value"       => "0"
         ]
@@ -288,7 +319,7 @@ function teamorga_activate()
         while ($theme = $db->fetch_array($themes)) {
             $tid = (int) $theme['tid'];
             $existing = $db->fetch_array(
-                $db->simple_select("themestylesheets", "sid", "name='teamorga.css' AND tid='{$tid}'")
+                $db->simple_select("themestylesheets", "sid", "name='teamorga.css' AND tid={$tid}")
             );
             if (!$existing) {
                 $sid = $db->insert_query("themestylesheets", [
@@ -299,7 +330,7 @@ function teamorga_activate()
                     "cachefile"    => "teamorga.css",
                     "lastmodified" => TIME_NOW,
                 ]);
-                $db->update_query("themestylesheets", ["cachefile" => "css.php?stylesheet={$sid}"], "sid='{$sid}'", 1);
+                $db->update_query("themestylesheets", ["cachefile" => "css.php?stylesheet={$sid}"], "sid=" . (int) $sid, 1);
             } else {
                 $db->update_query("themestylesheets", [
                     "stylesheet"   => $css_content,
@@ -440,7 +471,9 @@ function teamorga_deactivate()
  */
 function teamorga_newthread()
 {
-    global $mybb, $templates, $teamorga, $teamorga_newreply_suggestion;
+    global $mybb, $templates, $teamorga, $teamorga_newreply_suggestion, $lang;
+    teamorga_load_lang();
+
 
     $teamorga_newreply_suggestion = "";
 
@@ -519,7 +552,9 @@ function teamorga_do_newthread()
  */
 function teamorga_forumdisplay()
 {
-    global $db, $mybb, $thread, $templates, $teamorga_forumdisplay;
+    global $db, $mybb, $thread, $templates, $teamorga_forumdisplay, $lang;
+    teamorga_load_lang();
+
 
     $teamorga_forumdisplay = "";
 
@@ -549,13 +584,15 @@ function teamorga_forumdisplay()
         $deadline_label = $deadline;
         $deadline_class = "";
     } elseif ($days_left < 0) {
-        $deadline_label = "überfällig";
+        $deadline_label = $lang->teamorga_fd_overdue;
         $deadline_class = "teamorga-fd-deadline--overdue";
     } elseif ($days_left === 0) {
-        $deadline_label = "Heute!";
+        $deadline_label = $lang->teamorga_fd_today;
         $deadline_class = "teamorga-fd-deadline--today";
     } elseif ($days_left <= 3) {
-        $deadline_label = "in " . $days_left . " Tag" . ($days_left === 1 ? "" : "en");
+        $deadline_label = $days_left === 1
+            ? $lang->teamorga_fd_in_one_day
+            : $lang->sprintf($lang->teamorga_fd_in_days, $days_left);
         $deadline_class = "teamorga-fd-deadline--soon";
     } else {
         $deadline_label = $deadline;
@@ -563,7 +600,6 @@ function teamorga_forumdisplay()
     }
 
     // Priority label from language file
-    global $lang;
     $prio_key       = "teamorga_prio_" . $topic["prio"];
     $teamorga_prio  = isset($lang->$prio_key) ? $lang->$prio_key : ucfirst((string) $topic["prio"]);
 
@@ -589,8 +625,8 @@ function teamorga_forumdisplay()
             $urgency_mod = $is_urgent ? " teamorga-fd-action--urgent" : "";
             $teamorga_fd_action = "<span class=\"teamorga-fd-action{$urgency_mod}\">"
                 . ($is_urgent
-                    ? "&#9203; Deadline endet bald &ndash; Bitte reagieren!"
-                    : "&#9755; Bitte Teilnahme best&auml;tigen")
+                    ? $lang->teamorga_fd_deadline_soon
+                    : $lang->teamorga_fd_confirm_participation)
                 . "</span>";
         }
 
@@ -611,8 +647,8 @@ function teamorga_forumdisplay()
 
             if ($pending_count > 0) {
                 $label = $pending_count === 1
-                    ? "&#9654; Vorschlag wartet auf deine Stimme"
-                    : "&#9654; {$pending_count} Vorschl&auml;ge warten auf deine Stimme";
+                    ? $lang->teamorga_fd_vote_pending_one
+                    : $lang->sprintf($lang->teamorga_fd_vote_pending_many, $pending_count);
                 $urgency_mod = $is_urgent ? " teamorga-fd-action--urgent" : "";
                 $teamorga_fd_action .= "<span class=\"teamorga-fd-action{$urgency_mod}\">{$label}</span>";
             }
@@ -633,6 +669,8 @@ function teamorga_showthread()
     global $teamorga_addbutton;
     global $teamorga_ttid, $teamorga_deadline, $teamorga_prio, $teamorga_prio_label;
     global $teamorga_list_mitmachen, $teamorga_list_enthalten, $teamorga_list_mehrzeit, $teamorga_list_unanswered;
+    teamorga_load_lang();
+
 
     $teamorga_showthread = "";
     $teamorga_addbutton  = "";
@@ -641,7 +679,7 @@ function teamorga_showthread()
         return;
     }
 
-    $tid    = (int) ($mybb->input["tid"] ?? 0);
+    $tid    = $mybb->get_input("tid", MyBB::INPUT_INT);
     $uid    = (int) $mybb->user["uid"];
     $action = $mybb->get_input("teamorga_action");
 
@@ -653,7 +691,7 @@ function teamorga_showthread()
 
         $exists = $db->num_rows($db->simple_select("teamorga_topic", "id", "tid={$tid}"));
         if ($exists) {
-            redirect("showthread.php?tid={$tid}", "Dieses Thema ist bereits in Teamorga.");
+            redirect("showthread.php?tid={$tid}", $lang->teamorga_msg_already_added);
         }
 
         $days_offset                = (int) $mybb->settings["teamorga_deadline_default"];
@@ -674,7 +712,7 @@ function teamorga_showthread()
 
         $exists = $db->num_rows($db->simple_select("teamorga_topic", "id", "tid={$tid}"));
         if ($exists) {
-            redirect("showthread.php?tid={$tid}", "Dieses Thema ist bereits in Teamorga.");
+            redirect("showthread.php?tid={$tid}", $lang->teamorga_msg_already_added);
         }
 
         $deadline = $db->escape_string($mybb->get_input("teamorga_deadline"));
@@ -689,14 +727,14 @@ function teamorga_showthread()
         ]);
 
         teamorga_add_participants((int) $ttid, (int) $mybb->user["uid"]);
-        redirect("showthread.php?tid={$tid}", "Thema wurde zu Teamorga hinzugefügt.");
+        redirect("showthread.php?tid={$tid}", $lang->teamorga_msg_added);
     }
 
     // --- Action: show edit form for topic meta ---
     if ($action === "edit_topic") {
         $topic = teamorga_get_topic($tid);
         if (!$topic) {
-            error("Teamorga-Eintrag nicht gefunden.");
+            error($lang->teamorga_err_not_found);
         }
 
         if (!teamorga_can_always_edit() && (int) $topic["organizer_uid"] !== $uid) {
@@ -721,18 +759,18 @@ function teamorga_showthread()
     if ($mybb->request_method === "post" && $action === "edit_topic_save") {
         verify_post_check($mybb->get_input("my_post_key"));
 
-        $ttid     = (int) ($mybb->input["ttid"] ?? 0);
+        $ttid     = $mybb->get_input("ttid", MyBB::INPUT_INT);
         $deadline = $db->escape_string($mybb->get_input("teamorga_deadline"));
         $prio     = teamorga_sanitize_prio($mybb->get_input("teamorga_prio"));
 
         if ($ttid <= 0) {
-            error("Ungültiger Teamorga-Eintrag.");
+            error($lang->teamorga_err_invalid_entry);
         }
 
         // Verify ttid belongs to current thread and check permissions
         $ttid_topic = $db->fetch_array($db->simple_select("teamorga_topic", "id,organizer_uid", "id={$ttid} AND tid={$tid}"));
         if (!$ttid_topic) {
-            error("Ungültiger Teamorga-Eintrag.");
+            error($lang->teamorga_err_invalid_entry);
         }
         if (!teamorga_can_always_edit() && (int) $ttid_topic["organizer_uid"] !== $uid) {
             error_no_permission();
@@ -743,7 +781,7 @@ function teamorga_showthread()
             "prio"     => $prio
         ], "id={$ttid}");
 
-        redirect("showthread.php?tid={$tid}", "Teamorga-Einstellungen aktualisiert.");
+        redirect("showthread.php?tid={$tid}", $lang->teamorga_msg_settings_updated);
     }
 
     // --- Render the teamorga panel ---
@@ -779,18 +817,24 @@ function teamorga_showthread()
     if ($mybb->request_method === "post" && $action === "update_participation") {
         verify_post_check($mybb->get_input("my_post_key"));
 
-        $ttid_post = (int) ($mybb->input["ttid"] ?? 0);
+        $ttid_post = $mybb->get_input("ttid", MyBB::INPUT_INT);
 
         // Verify ttid belongs to current thread to prevent cross-thread manipulation
         if (!$db->fetch_field($db->simple_select("teamorga_topic", "id", "id={$ttid_post} AND tid={$tid}"), "id")) {
-            error("Ungültiger Teamorga-Eintrag.");
+            error($lang->teamorga_err_invalid_entry);
         }
 
         $allowed      = ["approved", "abstain", "time", "pending", "unanswered", "disapproved"];
         $new_status   = $mybb->get_input("teamorga_status");
+        // input.button liefert sein Label als Wert – daher eigener Name je Status.
+        foreach (["approved", "abstain", "time"] as $status_key) {
+            if ($mybb->get_input("teamorga_status_" . $status_key) !== "") {
+                $new_status = $status_key;
+            }
+        }
 
         if (!in_array($new_status, $allowed, true)) {
-            error("Ungültiger Status.");
+            error($lang->teamorga_err_invalid_status);
         }
         $new_status_escaped = $db->escape_string($new_status);
 
@@ -883,19 +927,19 @@ function teamorga_showthread()
             }
         }
 
-        redirect("showthread.php?tid={$tid}", "Dein Status wurde aktualisiert.");
+        redirect("showthread.php?tid={$tid}", $lang->teamorga_msg_status_updated);
     }
 
     // --- POST: update ownership ---
     if ($mybb->request_method === "post" && $action === "update_ownership") {
         verify_post_check($mybb->get_input("my_post_key"));
 
-        $ttid_post    = (int) ($mybb->input["ttid"] ?? 0);
+        $ttid_post    = $mybb->get_input("ttid", MyBB::INPUT_INT);
         $action_type  = $mybb->get_input("teamorga_ownership");
 
         // Verify ttid belongs to current thread
         if (!$db->fetch_field($db->simple_select("teamorga_topic", "id", "id={$ttid_post} AND tid={$tid}"), "id")) {
-            error("Ungültiger Teamorga-Eintrag.");
+            error($lang->teamorga_err_invalid_entry);
         }
 
         if ($action_type === "ownership_add") {
@@ -903,10 +947,10 @@ function teamorga_showthread()
         } elseif ($action_type === "ownership_remove") {
             $db->update_query("teamorga_topic", ["owner" => null], "id={$ttid_post}", 1, true);
         } else {
-            error("Ungültige Ownership-Aktion.");
+            error($lang->teamorga_err_invalid_ownership);
         }
 
-        redirect("showthread.php?tid={$tid}", "Ownership wurde aktualisiert.");
+        redirect("showthread.php?tid={$tid}", $lang->teamorga_msg_ownership_updated);
     }
 
     // --- POST: kick participant ---
@@ -917,16 +961,16 @@ function teamorga_showthread()
             error_no_permission();
         }
 
-        $ttid_post = (int) ($mybb->input["ttid"] ?? 0);
-        $kick_uid  = (int) ($mybb->input["kick_uid"] ?? 0);
+        $ttid_post = $mybb->get_input("ttid", MyBB::INPUT_INT);
+        $kick_uid  = $mybb->get_input("kick_uid", MyBB::INPUT_INT);
 
         if ($ttid_post <= 0 || $kick_uid <= 0) {
-            error("Ungültige Parameter.");
+            error($lang->teamorga_err_invalid_params);
         }
 
         // Verify ttid belongs to current thread to prevent cross-thread manipulation
         if (!$db->fetch_field($db->simple_select("teamorga_topic", "id", "id={$ttid_post} AND tid={$tid}"), "id")) {
-            error("Ungültiger Teamorga-Eintrag.");
+            error($lang->teamorga_err_invalid_entry);
         }
 
         // Remove from topic participants
@@ -941,19 +985,24 @@ function teamorga_showthread()
             AND s.active = 1
         ");
 
-        redirect("showthread.php?tid={$tid}", "Teilnehmer wurde entfernt.");
+        redirect("showthread.php?tid={$tid}", $lang->teamorga_msg_participant_removed);
     }
 
     // --- POST: owner decides on a time proposal ---
     if ($mybb->request_method === "post" && $action === "decide_time_proposal") {
         verify_post_check($mybb->get_input("my_post_key"));
 
-        $ttid_post   = (int) ($mybb->input["ttid"]        ?? 0);
-        $proposal_uid = (int) ($mybb->input["proposal_uid"] ?? 0);
+        $ttid_post   = $mybb->get_input("ttid", MyBB::INPUT_INT);
+        $proposal_uid = $mybb->get_input("proposal_uid", MyBB::INPUT_INT);
         $decision    = $mybb->get_input("proposal_decision");
+        if ($mybb->get_input("proposal_accept") !== "") {
+            $decision = "accept";
+        } elseif ($mybb->get_input("proposal_decline") !== "") {
+            $decision = "decline";
+        }
 
         if ($ttid_post <= 0 || $proposal_uid <= 0 || !in_array($decision, ["accept", "decline"], true)) {
-            error("Ungültige Parameter.");
+            error($lang->teamorga_err_invalid_params);
         }
 
         // Only topic owner may decide
@@ -976,7 +1025,7 @@ function teamorga_showthread()
                 "status"            => "approved",
                 "proposed_deadline" => "",
             ], "uid={$proposal_uid} AND tt_id={$ttid_post}");
-            redirect("showthread.php?tid={$tid}", "Deadline aktualisiert, Teilnehmer auf Mitmachen gesetzt.");
+            redirect("showthread.php?tid={$tid}", $lang->teamorga_msg_proposal_accepted);
         } else {
             $db->update_query("teamorga_topic_participants", [
                 "status"            => "abstain",
@@ -990,7 +1039,7 @@ function teamorga_showthread()
                 AND sp.tt_id = {$ttid_post}
                 AND s.active = 1
             ");
-            redirect("showthread.php?tid={$tid}", "Zeitvorschlag abgelehnt, Teilnehmer auf Enthalten gesetzt.");
+            redirect("showthread.php?tid={$tid}", $lang->teamorga_msg_proposal_declined);
         }
     }
 
@@ -1058,10 +1107,10 @@ function teamorga_showthread()
         }
     }
 
-    $teamorga_list_mitmachen  = $list_mitmachen  ? implode(", ", $list_mitmachen)  : "<em>keine</em>";
-    $teamorga_list_enthalten  = $list_enthalten  ? implode(", ", $list_enthalten)  : "<em>keine</em>";
-    $teamorga_list_mehrzeit   = $list_mehrzeit   ? implode(", ", $list_mehrzeit)   : "<em>keine</em>";
-    $teamorga_list_unanswered = $list_unanswered ? implode(", ", $list_unanswered) : "<em>keine</em>";
+    $teamorga_list_mitmachen  = $list_mitmachen  ? implode(", ", $list_mitmachen)  : "<em>" . $lang->teamorga_none . "</em>";
+    $teamorga_list_enthalten  = $list_enthalten  ? implode(", ", $list_enthalten)  : "<em>" . $lang->teamorga_none . "</em>";
+    $teamorga_list_mehrzeit   = $list_mehrzeit   ? implode(", ", $list_mehrzeit)   : "<em>" . $lang->teamorga_none . "</em>";
+    $teamorga_list_unanswered = $list_unanswered ? implode(", ", $list_unanswered) : "<em>" . $lang->teamorga_none . "</em>";
 
     // Owner display and controls
     if (!empty($topic["owner"])) {
@@ -1073,7 +1122,7 @@ function teamorga_showthread()
             $teamorga_owner_control = "";
         }
     } else {
-        $teamorga_owner = "<em>keine</em>";
+        $teamorga_owner = "<em>" . $lang->teamorga_none . "</em>";
         eval("\$teamorga_owner_control = \"" . $templates->get("teamorga_owner_control_add") . "\";");
     }
 
@@ -1106,11 +1155,13 @@ function teamorga_showthread()
  */
 function teamorga_newreply()
 {
-    global $db, $mybb, $templates, $teamorga_newreply_suggestion;
+    global $db, $mybb, $templates, $teamorga_newreply_suggestion, $lang;
+    teamorga_load_lang();
+
 
     $teamorga_newreply_suggestion = "";
 
-    $tid   = (int) ($mybb->input["tid"] ?? 0);
+    $tid   = $mybb->get_input("tid", MyBB::INPUT_INT);
     $topic = teamorga_get_topic($tid);
 
     if (!$topic) {
@@ -1188,7 +1239,9 @@ function teamorga_on_post_insert(&$post)
  */
 function teamorga_postbit(&$post)
 {
-    global $mybb, $db, $templates;
+    global $mybb, $db, $templates, $lang;
+    teamorga_load_lang();
+
 
     $post["teamorga"] = "";
 
@@ -1200,44 +1253,44 @@ function teamorga_postbit(&$post)
     }
 
     $uid    = (int) $mybb->user["uid"];
-    $tid    = (int) ($mybb->input["tid"] ?? 0);
+    $tid    = $mybb->get_input("tid", MyBB::INPUT_INT);
     $action = $mybb->get_input("teamorga_action");
 
     // --- POST: save suggestion text edit ---
     if ($mybb->request_method === "post" && $action === "save_suggestion") {
         verify_post_check($mybb->get_input("my_post_key"));
 
-        $sug_id = (int) ($mybb->input["sug_id"] ?? 0);
+        $sug_id = $mybb->get_input("sug_id", MyBB::INPUT_INT);
         if ($sug_id <= 0) {
-            error("Ungültiger Vorschlag.");
+            error($lang->teamorga_err_invalid_suggestion);
         }
 
         $sug_row = $db->fetch_array($db->simple_select("teamorga_suggestions", "id,owner_uid", "id={$sug_id}"));
         if (!$sug_row || ((int) $sug_row["owner_uid"] !== $uid && !teamorga_can_always_edit())) {
-            error("Keine Berechtigung zum Bearbeiten.");
+            error($lang->teamorga_err_no_edit_permission);
         }
 
         $db->update_query("teamorga_suggestions", [
             "suggestion" => $db->escape_string($mybb->get_input("suggestion"))
         ], "id={$sug_id}");
 
-        redirect("showthread.php?tid={$post['tid']}&pid={$post['pid']}#pid{$post['pid']}", "Vorschlag aktualisiert.");
+        redirect("showthread.php?tid={$post['tid']}&pid={$post['pid']}#pid{$post['pid']}", $lang->teamorga_msg_suggestion_updated);
     }
 
     // --- POST: toggle suggestion active/inactive ---
     if ($mybb->request_method === "post" && $action === "toggle_suggestion_active") {
         verify_post_check($mybb->get_input("my_post_key"));
 
-        $sug_id  = (int) ($mybb->input["sug_id"] ?? 0);
+        $sug_id  = $mybb->get_input("sug_id", MyBB::INPUT_INT);
         if ($sug_id <= 0) {
-            error("Ungültiger Vorschlag.");
+            error($lang->teamorga_err_invalid_suggestion);
         }
         $srow = $db->fetch_array($db->simple_select("teamorga_suggestions", "id,owner_uid,active,tt_id,pid", "id={$sug_id}"));
         if (!$srow) {
-            error("Vorschlag nicht gefunden.");
+            error($lang->teamorga_err_suggestion_not_found);
         }
         if (!teamorga_can_toggle_suggestion($srow, $uid)) {
-            error("Keine Berechtigung.");
+            error($lang->teamorga_err_no_permission);
         }
 
         $new_active = $srow["active"] ? 0 : 1;
@@ -1265,7 +1318,7 @@ function teamorga_postbit(&$post)
         }
 
         $sug_pid = (int) $srow["pid"];
-        redirect("showthread.php?tid={$post['tid']}&pid={$sug_pid}#pid{$sug_pid}", "Vorschlag aktualisiert.");
+        redirect("showthread.php?tid={$post['tid']}&pid={$sug_pid}#pid{$sug_pid}", $lang->teamorga_msg_suggestion_updated);
     }
 
     // --- POST: review or withdraw review of suggestion ---
@@ -1276,7 +1329,7 @@ function teamorga_postbit(&$post)
         $allowed_reviews = ["approved", "disapproved"];
         $decision        = $mybb->get_input("review_decision");
         if (!in_array($decision, $allowed_reviews, true)) {
-            error("Ungültige Bewertungsauswahl.");
+            error($lang->teamorga_err_invalid_vote);
         }
         $new_status = $decision;
     } elseif ($mybb->request_method === "post" && $action === "withdraw_review") {
@@ -1285,12 +1338,12 @@ function teamorga_postbit(&$post)
     }
 
     if ($new_status !== null) {
-        $sug_id      = (int) ($mybb->input["sug_id"] ?? 0);
+        $sug_id      = $mybb->get_input("sug_id", MyBB::INPUT_INT);
         $participant = $db->fetch_array(
             $db->simple_select("teamorga_suggestion_participants", "*", "uid={$uid} AND sug_id={$sug_id}")
         );
         if (!$participant) {
-            error("Du bist nicht als Teilnehmer für diesen Vorschlag registriert.");
+            error($lang->teamorga_err_not_participant);
         }
 
         $db->update_query(
@@ -1327,7 +1380,7 @@ function teamorga_postbit(&$post)
             }
         }
 
-        redirect("showthread.php?tid={$post['tid']}&pid={$post['pid']}#pid{$post['pid']}", "Bewertung gespeichert.");
+        redirect("showthread.php?tid={$post['tid']}&pid={$post['pid']}#pid{$post['pid']}", $lang->teamorga_msg_vote_saved);
     }
 
     // --- Render suggestion block ---
@@ -1366,7 +1419,12 @@ function teamorga_postbit(&$post)
         // page where the suggestion actually is (default would be page 1).
         $current_page = $mybb->get_input("page", MyBB::INPUT_INT);
         $page_param   = $current_page > 1 ? "&amp;page=" . $current_page : "";
-        $teamorga_edit_button = '<a href="showthread.php?tid=' . $post["tid"] . '&amp;sug_id=' . $suggestion["id"] . '&amp;teamorga_action=edit_suggestion' . $page_param . '#pid' . $post["pid"] . '" class="teamorga-edit-link" title="Bearbeiten">&#9998;</a>';
+        $teamorga_edit_button = '<form method="get" action="showthread.php#pid' . (int) $post["pid"] . '" class="teamorga-inline-form">'
+            . '<input type="hidden" name="tid" value="' . (int) $post["tid"] . '" />'
+            . '<input type="hidden" name="sug_id" value="' . (int) $suggestion["id"] . '" />'
+            . '<input type="hidden" name="teamorga_action" value="edit_suggestion" />'
+            . ($current_page > 1 ? '<input type="hidden" name="page" value="' . $current_page . '" />' : '')
+            . '<input type="submit" class="button" value="' . htmlspecialchars_uni($lang->teamorga_edit) . '" /></form>';
     }
 
     // Toggle active/inactive button
@@ -1374,10 +1432,10 @@ function teamorga_postbit(&$post)
     if (teamorga_can_toggle_suggestion($suggestion, $uid)) {
         $is_active = !empty($suggestion["active"]);
         if ($is_active) {
-            $title = "Vorschlag deaktivieren";
+            $title = htmlspecialchars_uni($lang->teamorga_suggestion_deactivate_title);
             eval("\$toggle_btn_content = \"" . $templates->get("teamorga_suggestion_toggle_inactive") . "\";");
         } else {
-            $title = "Vorschlag aktivieren";
+            $title = htmlspecialchars_uni($lang->teamorga_suggestion_activate_title);
             eval("\$toggle_btn_content = \"" . $templates->get("teamorga_suggestion_toggle_active") . "\";");
         }
         eval("\$teamorga_toggle_suggestion_button = \"" . $templates->get("teamorga_suggestion_toggle") . "\";");
@@ -1389,6 +1447,7 @@ function teamorga_postbit(&$post)
         // Preserve the current thread page for the cancel link.
         $edit_page      = $mybb->get_input("page", MyBB::INPUT_INT);
         $teamorga_cancel_page_param = $edit_page > 1 ? "&amp;page=" . $edit_page : "";
+        $teamorga_cancel_page_field = $edit_page > 1 ? '<input type="hidden" name="page" value="' . $edit_page . '" />' : "";
         $teamorga_suggestion_text = "";
         eval("\$teamorga_suggestion_text = \"" . $templates->get("teamorga_suggestion_edit_form") . "\";");
         $teamorga_suggestion_author = "";
@@ -1421,15 +1480,17 @@ function teamorga_postbit(&$post)
         }
     }
 
-    $teamorga_list_approved    = $list_approved    ? implode(", ", $list_approved)    : "<em>keine</em>";
-    $teamorga_list_disapproved = $list_disapproved ? implode(", ", $list_disapproved) : "<em>keine</em>";
-    $teamorga_list_pending     = $list_pending     ? implode(", ", $list_pending)     : "<em>keine</em>";
+    $teamorga_list_approved    = $list_approved    ? implode(", ", $list_approved)    : "<em>" . $lang->teamorga_none . "</em>";
+    $teamorga_list_disapproved = $list_disapproved ? implode(", ", $list_disapproved) : "<em>" . $lang->teamorga_none . "</em>";
+    $teamorga_list_pending     = $list_pending     ? implode(", ", $list_pending)     : "<em>" . $lang->teamorga_none . "</em>";
 
     eval("\$teamorga_suggestion_participant_list = \"" . $templates->get("teamorga_suggestion_participant_list") . "\";");
 
     if (!empty($suggestion["active"])) {
+        $teamorga_suggestion_by = $lang->sprintf($lang->teamorga_suggestion_by, $teamorga_suggestion_author);
         eval("\$post[\"teamorga\"] = \"" . $templates->get("teamorga_suggestion_box") . "\";");
     } else {
+        $teamorga_suggestion_by = $lang->sprintf($lang->teamorga_suggestion_inactive_by, $teamorga_suggestion_author);
         eval("\$post[\"teamorga\"] = \"" . $templates->get("teamorga_suggestion_box_inactive") . "\";");
     }
 }
@@ -1439,7 +1500,9 @@ function teamorga_postbit(&$post)
  */
 function teamorga_index()
 {
-    global $db, $mybb, $templates, $teamorga_index_alerts;
+    global $db, $mybb, $templates, $teamorga_index_alerts, $lang;
+    teamorga_load_lang();
+
 
     $teamorga_index_alerts = "";
 
@@ -1464,6 +1527,7 @@ function teamorga_index()
     while ($row = $db->fetch_array($q)) {
         $threadlink = get_thread_link((int) $row["tid"]);
         $subject    = htmlspecialchars_uni($row["subject"]);
+        $teamorga_alert_text = $lang->sprintf($lang->teamorga_index_unanswered, '<a href="' . $threadlink . '">' . $subject . '</a>');
         eval("\$alerts .= \"" . $templates->get("teamorga_index_alert") . "\";");
     }
 
@@ -1498,6 +1562,7 @@ function teamorga_index()
         $threadlink = get_thread_link((int) $row["tid"]);
         $subject    = htmlspecialchars_uni($row["subject"]);
         $deadline   = date("d.m.Y", strtotime($row["deadline"]));
+        $teamorga_alert_text = $lang->sprintf($lang->teamorga_index_memo, '<a href="' . $threadlink . '">' . $subject . '</a>', $deadline);
         eval("\$alerts .= \"" . $templates->get("teamorga_index_alert_memo") . "\";");
     }
 
@@ -1515,7 +1580,8 @@ function teamorga_index()
             }
             $subject    = htmlspecialchars_uni($topic_thread["subject"]);
             $threadlink = get_thread_link((int) $row["tid"]);
-            eval("\$alerts .= \"" . $templates->get("teamorga_index_alert_approved") . "\";");
+            $teamorga_alert_text = $lang->sprintf($lang->teamorga_index_approved, '<a href="' . $threadlink . '">' . $subject . '</a>');
+        eval("\$alerts .= \"" . $templates->get("teamorga_index_alert_approved") . "\";");
         }
     }
 
@@ -1532,7 +1598,8 @@ function teamorga_index()
         while ($row = $db->fetch_array($q)) {
             $subject    = htmlspecialchars_uni($row["subject"]);
             $threadlink = get_thread_link((int) $row["tid"]);
-            eval("\$alerts .= \"" . $templates->get("teamorga_index_alert_owner_missing") . "\";");
+            $teamorga_alert_text = $lang->sprintf($lang->teamorga_index_owner_missing, '<a href="' . $threadlink . '">' . $subject . '</a>');
+        eval("\$alerts .= \"" . $templates->get("teamorga_index_alert_owner_missing") . "\";");
         }
     }
 
@@ -1550,15 +1617,20 @@ function teamorga_is_forum_enabled($fid = null)
 {
     global $mybb, $db;
 
-    if (empty($mybb->settings["teamorga_forums"]) || $mybb->settings["teamorga_forums"] == -1) {
+    // MyBB forumselect: "-1" = all forums, "" = none (Teamorga stays off until forums are chosen).
+    $forums = trim((string)($mybb->settings["teamorga_forums"] ?? ""));
+    if ($forums === "-1") {
         return true;
+    }
+    if ($forums === "") {
+        return false;
     }
 
     if ($fid === null) {
         if (in_array(THIS_SCRIPT, ["forumdisplay.php", "newthread.php"], true)) {
-            $fid = (int) ($mybb->input["fid"] ?? 0);
+            $fid = $mybb->get_input("fid", MyBB::INPUT_INT);
         } elseif (in_array(THIS_SCRIPT, ["showthread.php", "newreply.php"], true)) {
-            $tid = (int) ($mybb->input["tid"] ?? 0);
+            $tid = $mybb->get_input("tid", MyBB::INPUT_INT);
             $fid = (int) $db->fetch_field($db->simple_select("threads", "fid", "tid={$tid}"), "fid");
         }
     }
@@ -1578,7 +1650,9 @@ function teamorga_is_group_allowed($uid = null)
 {
     global $mybb;
 
-    if (empty($mybb->settings["teamorga_groups"]) || $mybb->settings["teamorga_groups"] == -1) {
+    // MyBB groupselect: "-1" = all groups, "" = no group (only the team account below).
+    $groups = trim((string)($mybb->settings["teamorga_groups"] ?? ""));
+    if ($groups === "-1") {
         return true;
     }
 
@@ -1613,8 +1687,13 @@ function teamorga_can_always_edit()
 {
     global $mybb;
 
-    if (empty($mybb->settings["teamorga_edit_groups"]) || $mybb->settings["teamorga_edit_groups"] == -1) {
+    // MyBB groupselect: "-1" = all groups, "" = no group (everyone edits only their own).
+    $edit_groups = trim((string)($mybb->settings["teamorga_edit_groups"] ?? ""));
+    if ($edit_groups === "-1") {
         return true;
+    }
+    if ($edit_groups === "") {
+        return false;
     }
 
     $allowed    = array_map("intval", explode(",", $mybb->settings["teamorga_edit_groups"]));
@@ -1776,16 +1855,16 @@ function teamorga_add_participants(int $ttid, int $organizer_uid): void
 
     $setting = trim($mybb->settings["teamorga_groups"] ?? "");
 
-    // Collect positive group IDs; -1 or empty means "all groups allowed"
+    // Collect positive group IDs; -1 means "all groups", empty means "no group" (organizer only)
     $groups = array_values(array_filter(
         array_map("intval", explode(",", $setting)),
         function ($g) { return $g > 0; }
     ));
 
-    $all_allowed = ($setting === "" || $setting === "-1" || in_array(-1, array_map("intval", explode(",", $setting)), true));
+    $all_allowed = ($setting === "-1" || in_array(-1, array_map("intval", explode(",", $setting)), true));
 
     if ($all_allowed && empty($groups)) {
-        // -1 / empty = all users are team members – fetch everyone
+        // -1 = all users are team members – fetch everyone
         $query = $db->query("SELECT uid FROM " . TABLE_PREFIX . "users WHERE uid > 0");
     } elseif (!empty($groups)) {
         $group_list = implode(",", $groups);
@@ -1868,7 +1947,7 @@ function teamorga_build_suggestion_links(int $ttid, int $tid): array
 
         $entries[] = [
             "label" => $label,
-            "html"  => '<a href="' . $href . '" class="teamorga-sug-link" title="' . $preview . '">Vorschlag ' . $label . '</a>'
+            "html"  => '<a href="' . $href . '" class="teamorga-sug-link" title="' . $preview . '">' . $lang->sprintf($lang->teamorga_suggestion_link, $label) . '</a>'
         ];
     }
 

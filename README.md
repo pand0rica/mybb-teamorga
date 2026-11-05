@@ -10,14 +10,14 @@ Teamorga helps teams coordinate decisions in the forum. Threads can be marked as
 
 - MyBB 1.8.x
 - PHP 7.4 or higher
-- No dependencies on other plugins
+- No required plugins. Optional: [MyAlerts](https://github.com/MyBBStuff/MyAlerts) for alerts on suggestion votes and time proposals.
 
 ---
 
 ## Installation
 
-1. Upload all files from `inc/` to your MyBB root `inc/` directory.
-2. Go to **Admin CP → Configuration → Plugins** and activate **Teamorga**.
+1. Upload the `inc/` folder to your MyBB root directory, keeping the folder structure.
+2. Go to **Admin CP → Configuration → Plugins** and click **Install & Activate** next to **Teamorga**.
 3. Go to **Admin CP → Configuration → Settings → Teamorga** and configure the plugin.
 
 ---
@@ -27,9 +27,9 @@ Teamorga helps teams coordinate decisions in the forum. Threads can be marked as
 | Setting | Description |
 |---|---|
 | **Enabled** | Enable or disable the plugin globally. |
-| **Forums** | Which forums the plugin applies to. |
-| **Groups** | Which user groups can use Teamorga. Set to `-1` for all groups. |
-| **Editor Groups** | Which groups may edit any suggestion (not just their own). |
+| **Forums** | Which forums the plugin applies to. *All* (`-1`) = every forum, *None* (empty) = Teamorga is off until forums are selected. |
+| **Groups** | Which user groups can use Teamorga. Set to `-1` for all groups; empty = no group (only the team account). Default: Super Moderators, Administrators, Moderators. |
+| **Editor Groups** | Which groups may edit any suggestion (not just their own). `-1` = all, empty = nobody (everyone edits only their own). Default: Super Moderators, Administrators, Moderators. |
 | **Default Deadline (days)** | Pre-filled deadline offset when creating a new topic. |
 | **Reminder Lead (days)** | How many days before deadline a reminder appears on the index. |
 | **Team Account ID** | UID of a shared team account that can create topics but is not counted as a voter. |
@@ -94,7 +94,7 @@ Inactive topics are treated as done and show no pending CTA.
 Each post with a suggestion shows voting buttons for all active participants:
 
 - **✓ Dafür** – vote in favour.
-- **✗ Dagegen** – vote against.
+- **Änderung erwünscht** – ask for changes to the suggestion.
 - Withdraw your vote at any time.
 
 Suggestion owners and editor-group members can edit the suggestion text or toggle it active/inactive.
