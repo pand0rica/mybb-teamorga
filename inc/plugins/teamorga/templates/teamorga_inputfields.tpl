@@ -1,12 +1,12 @@
 <tr>
-	<td class="thead" colspan="2">{$lang->teamorga_settings_title}</td>
+	<td class="thead" colspan="2"><strong>{$lang->teamorga_settings_title}</strong></td>
 </tr>
 <tr>
-	<td class="trow2" style="width:30%"><label for="teamorga_deadline">{$lang->teamorga_deadline}</label></td>
+	<td class="trow2"><strong><label for="teamorga_deadline">{$lang->teamorga_deadline}</label></strong></td>
 	<td class="trow2"><input type="date" id="teamorga_deadline" name="teamorga_deadline" value="{$default_deadline}" /></td>
 </tr>
 <tr>
-	<td class="trow1"><label for="teamorga_prio">{$lang->teamorga_priority}</label></td>
+	<td class="trow1"><strong><label for="teamorga_prio">{$lang->teamorga_priority}</label></strong></td>
 	<td class="trow1">
 		<select id="teamorga_prio" name="teamorga_prio">
 					<option value="low">{$lang->teamorga_prio_low}</option>

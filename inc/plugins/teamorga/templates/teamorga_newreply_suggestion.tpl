@@ -1,6 +1,6 @@
 <tr>
 	<td class="thead" colspan="2">
-		{$lang->teamorga_suggestion_submit_title} <span class="teamorga-optional">– {$lang->teamorga_optional}</span>
+		<strong>{$lang->teamorga_suggestion_submit_title}</strong> <span class="teamorga-optional">– {$lang->teamorga_optional}</span>
 	</td>
 </tr>
 <tr>
