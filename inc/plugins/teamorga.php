@@ -412,8 +412,7 @@ function teamorga_activate()
     if (function_exists('myalerts_is_activated') && myalerts_is_activated()
         && class_exists('MybbStuff_MyAlerts_AlertTypeManager')) {
         $alertTypeManager = MybbStuff_MyAlerts_AlertTypeManager::getInstance();
-        // getInstance() liefert false (nicht null), solange MyAlerts nicht initialisiert ist (z. B. CLI/Deploy)
-        if ($alertTypeManager) {
+        if ($alertTypeManager !== null) {
             if ($alertTypeManager->getByCode('teamorga_suggestion_vote') === null) {
                 $t = new MybbStuff_MyAlerts_Entity_AlertType();
                 $t->setCode('teamorga_suggestion_vote');
