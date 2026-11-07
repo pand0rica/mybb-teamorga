@@ -7,7 +7,6 @@ All notable changes to Teamorga are documented here.
 ## [Unreleased]
 
 ### Fixed
-- **Activation crashed without an initialised MyAlerts** (`getByCode() on bool`, e.g. when re-activating from the CLI): the alert-type manager is now checked for a truthy value instead of `!== null`.
 - **`{$post['teamorga']}` undefined in PMs, previews and announcements.** Every postbit flavour now gets an empty default.
 - **Alert types missing in the UCP alert settings** while the plugin is switched off: the labels (`myalerts_setting_teamorga_*`, English and German) are loaded via `myalerts_load_lang`.
 - **Priority label text colour** in the forum display was overridden by the dim label colour.
