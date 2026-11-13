@@ -442,6 +442,16 @@ function teamorga_deactivate()
     // Remove MyAlerts alert type
     if (function_exists('myalerts_is_activated') && myalerts_is_activated()) {
         $db->delete_query("alert_types", "code IN ('teamorga_suggestion_vote','teamorga_time_proposal')");
+
+        // Refresh the MyAlerts alert-type cache so the deleted types don't linger
+        // in it – otherwise a later reactivation reads the stale cache and skips
+        // re-adding them, and alerts silently stop (see teamorga_get_alert_type()).
+        if (class_exists('MybbStuff_MyAlerts_AlertTypeManager')) {
+            $atm = MybbStuff_MyAlerts_AlertTypeManager::getInstance();
+            if ($atm) {
+                $atm->getAlertTypes(true);
+            }
+        }
     }
 
     // Remove stylesheet from all themes
@@ -890,9 +900,8 @@ function teamorga_showthread()
                 $owner_uid = $owner_row ? (int) $owner_row["uid"] : 0;
             }
             if ($owner_uid > 0 && $owner_uid !== $uid) {
-                $atm   = MybbStuff_MyAlerts_AlertTypeManager::getInstance();
-                $atype = $atm ? $atm->getByCode('teamorga_time_proposal') : null;
-                if ($atype && $atype->getEnabled()) {
+                $atype = teamorga_get_alert_type('teamorga_time_proposal');
+                if ($atype) {
                     $date_fmt = DateTime::createFromFormat("Y-m-d", $proposed_deadline);
                     $date_de  = $date_fmt ? $date_fmt->format("d.m.Y") : $proposed_deadline;
                     $alert    = new MybbStuff_MyAlerts_Entity_Alert($owner_uid, $atype, $ttid_post);
@@ -1394,10 +1403,9 @@ function teamorga_postbit(&$post)
 
             // Don't alert yourself
             if ($owner_uid > 0 && $owner_uid !== $uid) {
-                $alertTypeManager = MybbStuff_MyAlerts_AlertTypeManager::getInstance();
-                $alertType        = $alertTypeManager ? $alertTypeManager->getByCode('teamorga_suggestion_vote') : null;
+                $alertType = teamorga_get_alert_type('teamorga_suggestion_vote');
 
-                if ($alertType && $alertType->getEnabled()) {
+                if ($alertType) {
                     $alert_pid = (int) ($sug_row["pid"] ?? 0);
                     $alert_tid = (int) $post["tid"];
                     $alert     = new MybbStuff_MyAlerts_Entity_Alert($owner_uid, $alertType, $sug_id);
@@ -1777,6 +1785,67 @@ function teamorga_myalerts_register()
             );
         }
     }
+}
+
+/**
+ * Return an enabled teamorga MyAlerts alert type, recreating the type row on the
+ * fly if it is missing from the alert_types table. Returns the type or null.
+ *
+ * Root cause this guards against: teamorga_deactivate() deletes its alert_type
+ * rows with a raw delete_query(). If the MyAlerts type datacache is not refreshed
+ * afterwards, the table loses the rows while the cache still lists them; a later
+ * reactivation then reads the stale cache via getByCode(), assumes the types
+ * still exist and skips re-adding them – so the rows stay gone. getByCode() keeps
+ * returning a type whose id is no longer in the table, the alert is written with
+ * a dangling alert_type_id and never displays (the display JOIN on alert_types
+ * fails). That is the "team member reacted but I got no alert" symptom.
+ *
+ * deactivate() now refreshes the cache, which prevents the desync at the source;
+ * this helper is the belt-and-braces safety net, verifying against the table
+ * (not just the cache) every time an alert is fired.
+ */
+function teamorga_get_alert_type(string $code)
+{
+    global $db;
+
+    if (!function_exists('myalerts_is_activated') || !myalerts_is_activated()
+        || !class_exists('MybbStuff_MyAlerts_AlertTypeManager')) {
+        return null;
+    }
+
+    $manager = MybbStuff_MyAlerts_AlertTypeManager::getInstance();
+    if (!$manager) {
+        return null;
+    }
+
+    // Authoritative check: does the row actually exist in the table?
+    $existing = $db->fetch_array(
+        $db->simple_select('alert_types', 'id,enabled', "code='" . $db->escape_string($code) . "'")
+    );
+
+    if (!$existing) {
+        // Missing from the table – resync the (possibly stale) cache first so
+        // add() will insert, then recreate the type.
+        $manager->getAlertTypes(true);
+        $t = new MybbStuff_MyAlerts_Entity_AlertType();
+        $t->setCode($code);
+        $t->setEnabled(true);
+        $t->setCanBeUserDisabled(true);
+        $t->setDefaultUserEnabled(true);
+        $manager->add($t);
+    } elseif ((int) $existing['enabled'] !== 1) {
+        return null; // exists but disabled by the admin
+    } elseif ($manager->getByCode($code) === null) {
+        // Row exists but the cache is stale and lacks it – resync.
+        $manager->getAlertTypes(true);
+    }
+
+    $alertType = $manager->getByCode($code);
+    if ($alertType && $alertType->getEnabled()) {
+        return $alertType;
+    }
+
+    return null;
 }
 
 /**
