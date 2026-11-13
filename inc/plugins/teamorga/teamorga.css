@@ -802,10 +802,10 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
     border-left: 4px solid var(--to-border-strong);
     border-radius: 3px;
 }
-.teamorga-ucp-item.teamorga-high   { border-left-color: var(--to-danger, #a94442); }
-.teamorga-ucp-item.teamorga-medium { border-left-color: var(--to-warning, #8a6d3b); }
-.teamorga-ucp-item.teamorga-normal { border-left-color: var(--to-accent); }
-.teamorga-ucp-item.teamorga-low    { border-left-color: var(--to-success); }
+.teamorga-ucp-item.teamorga-ucp-prio-high   { border-left-color: var(--to-danger, #a94442); }
+.teamorga-ucp-item.teamorga-ucp-prio-medium { border-left-color: var(--to-warning, #8a6d3b); }
+.teamorga-ucp-item.teamorga-ucp-prio-normal { border-left-color: var(--to-accent); }
+.teamorga-ucp-item.teamorga-ucp-prio-low    { border-left-color: var(--to-success); }
 .teamorga-ucp-item.teamorga-ucp-reminder { border-left-color: var(--to-info, #31708f); }
 .teamorga-ucp-done { opacity: 0.6; }
 .teamorga-ucp-head { display: block; margin: 0 0 4px; }
