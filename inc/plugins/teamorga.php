@@ -2425,7 +2425,7 @@ function teamorga_usercp(): void
             $task_list .= teamorga_render_tpl("teamorga_usercp_task", [
                 "task_href"        => htmlspecialchars_uni(get_thread_link($d["tid"])),
                 "task_subject"     => htmlspecialchars_uni($d["subject"]),
-                "task_prio_class"  => "teamorga-" . $prio,
+                "task_prio_class"  => "teamorga-ucp-prio-" . $prio,
                 "task_prio_label"  => htmlspecialchars_uni($lang->$prio_key),
                 "task_deadline"    => $has_date ? teamorga_ucp_format_date($d["deadline"]) : htmlspecialchars_uni($lang->teamorga_ucp_no_deadline),
                 "task_badge"       => $badge($d["deadline"]),
