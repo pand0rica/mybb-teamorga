@@ -22,7 +22,8 @@ if (!isset($mybb->settings["teamorga_enabled"]) || $mybb->settings["teamorga_ena
     $plugins->add_hook("datahandler_post_insert_post_end", "teamorga_on_post_insert");
     $plugins->add_hook("postbit", "teamorga_postbit");
     $plugins->add_hook("global_start", "teamorga_myalerts_register");
-    $plugins->add_hook("usercp_menu", "teamorga_usercp_menu", 40);
+    $plugins->add_hook("usercp_menu", "teamorga_usercp_menu", 24);
+    $plugins->add_hook("usercp_menu_rpg", "teamorga_usercp_menu_rpg");
     $plugins->add_hook("usercp_start", "teamorga_usercp");
 
     // Register forum-specific hooks only for enabled forums
@@ -2088,23 +2089,44 @@ function teamorga_build_suggestion_links(int $ttid, int $tid): array
 // ============================================================================
 
 /**
- * Add the "Team tasks" link to the UserCP navigation (team members only).
+ * HTML of the UserCP navigation row (team members only, empty string otherwise).
+ */
+function teamorga_usercp_nav_row(): string
+{
+    global $mybb;
+
+    if ((int) $mybb->user["uid"] < 1 || !teamorga_is_group_allowed()) {
+        return "";
+    }
+
+    $lang = teamorga_load_lang();
+
+    return '<tr><td class="trow1 smalltext"><a href="usercp.php?action=teamorga" class="usercp_nav_item usercp_nav_teamorga" style="padding-left: 0;">'
+        . '<svg class="usercp_nav_icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true" style="vertical-align: -3px; margin-right: 6px;"><path d="M2.5 4.5l1.5 1.5 2.5-3M2.5 10.5L4 12l2.5-3M8.5 5h5M8.5 11h5" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        . htmlspecialchars_uni($lang->teamorga_ucp_nav) . '</a></td></tr>';
+}
+
+/**
+ * Standard MyBB: append the row to the "Miscellaneous" block. Must run before the core
+ * usercp_menu_misc() renders that template (priority 30), hence priority 24.
+ * Skipped when the h4w RPG menu is present: there the row goes through teamorga_usercp_menu_rpg().
  */
 function teamorga_usercp_menu(): void
 {
-    global $mybb, $templates, $lang;
+    global $templates;
 
-    if ((int) $mybb->user["uid"] < 1 || !teamorga_is_group_allowed()) {
+    if (function_exists("usercp_menu_rpg")) {
         return;
     }
 
-    teamorga_load_lang();
+    $item = teamorga_usercp_nav_row();
+    if ($item === "") {
+        return;
+    }
 
     // get() makes sure the raw template is in the cache before we modify it
     $templates->get("usercp_nav_misc");
-    $raw  = isset($templates->cache["usercp_nav_misc"]) ? (string) $templates->cache["usercp_nav_misc"] : "";
-    $item = '<tr><td class="trow1 smalltext"><a href="usercp.php?action=teamorga" class="usercp_nav_item usercp_nav_teamorga">'
-        . htmlspecialchars_uni($lang->teamorga_ucp_nav) . '</a></td></tr>';
+    $raw = isset($templates->cache["usercp_nav_misc"]) ? (string) $templates->cache["usercp_nav_misc"] : "";
 
     $pos = strripos($raw, "</tbody>");
     if ($pos !== false) {
@@ -2113,6 +2135,15 @@ function teamorga_usercp_menu(): void
         $raw .= $item;
     }
     $templates->cache["usercp_nav_misc"] = $raw;
+}
+
+/**
+ * h4w: the RPG menu (usercp_nav_rpg plugin) collects extra rows in $usercp_nav_rpg_custom.
+ * The hook only fires there, so it is a no-op on a standard MyBB.
+ */
+function teamorga_usercp_menu_rpg(&$usercp_nav_rpg_custom): void
+{
+    $usercp_nav_rpg_custom .= teamorga_usercp_nav_row();
 }
 
 /**
