@@ -2201,8 +2201,9 @@ function teamorga_ucp_collect(int $uid): array
         }
         $fid = (int) $row["fid"];
         if (!isset($perm_seen[$fid])) {
+            // Only threads in forums where Teamorga is enabled (the thread view shows no panel elsewhere)
             $fp = forum_permissions($fid);
-            $perm_seen[$fid] = !empty($fp["canview"]);
+            $perm_seen[$fid] = teamorga_is_forum_enabled($fid) && !empty($fp["canview"]);
         }
         if (!$perm_seen[$fid]) {
             return false;
