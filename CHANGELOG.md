@@ -6,7 +6,20 @@ All notable changes to Teamorga are documented here.
 
 ## [Unreleased]
 
+### Added
+- **UserCP page "My team tasks"** (`usercp.php?action=teamorga`): open topics and unvoted suggestions of the current team member, sorted by deadline (suggestions by post order).
+- **Private reminders** on that page (title, date, note; mark done, reopen, delete) in the new table `teamorga_reminders`.
+- Upgrade: deactivate and reactivate the plugin to create the table and load the new templates.
+
 ### Fixed
+- **MyAlerts notifications silently stopped firing** (suggestion reactions, time
+  proposals) once the alert types went missing from the `alert_types` table. Root
+  cause: `teamorga_deactivate()` deleted the alert-type rows without refreshing
+  MyAlerts' alert-type cache, so a later reactivation read the stale cache,
+  assumed the types still existed and skipped re-adding them. `teamorga_deactivate()`
+  now refreshes the cache after deletion, and alerts are fired through a new
+  self-healing helper (`teamorga_get_alert_type()`) that verifies against the
+  table and recreates a missing type on the fly.
 - **`{$post['teamorga']}` undefined in PMs, previews and announcements.** Every postbit flavour now gets an empty default.
 - **Alert types missing in the UCP alert settings** while the plugin is switched off: the labels (`myalerts_setting_teamorga_*`, English and German) are loaded via `myalerts_load_lang`.
 - **Priority label text colour** in the forum display was overridden by the dim label colour.

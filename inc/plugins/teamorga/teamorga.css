@@ -787,3 +787,40 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 	align-self: center;
 	padding: 0 10px;
 }
+
+/* ============================================================
+   UserCP: team tasks page
+   ============================================================ */
+.teamorga-ucp-list { list-style: none; margin: 0; padding: 0; }
+.teamorga-ucp-item {
+    border: 1px solid var(--to-border);
+    border-left: 4px solid var(--to-border-strong);
+    background: var(--to-bg);
+    border-radius: 3px;
+    margin: 0 0 8px;
+    padding: 8px 10px;
+}
+.teamorga-ucp-item.teamorga-high   { border-left-color: var(--to-danger, #a94442); }
+.teamorga-ucp-item.teamorga-medium { border-left-color: var(--to-warning, #8a6d3b); }
+.teamorga-ucp-item.teamorga-normal { border-left-color: var(--to-accent); }
+.teamorga-ucp-item.teamorga-low    { border-left-color: var(--to-success); }
+.teamorga-ucp-reminder { border-left-color: var(--to-info, #31708f) !important; }
+.teamorga-ucp-done { opacity: 0.6; }
+.teamorga-ucp-head { margin-bottom: 2px; }
+.teamorga-ucp-title { font-weight: bold; }
+.teamorga-ucp-meta, .teamorga-ucp-preview { color: var(--to-text-dim); font-size: 0.9em; }
+.teamorga-ucp-note { margin: 4px 0; }
+.teamorga-ucp-suggestions { margin: 6px 0 0 18px; padding: 0; }
+.teamorga-ucp-actions { margin-top: 6px; }
+.teamorga-ucp-empty { color: var(--to-text-muted); padding: 6px 0; }
+.teamorga-ucp-badge {
+    display: inline-block;
+    font-size: 0.8em;
+    padding: 0 6px;
+    border-radius: 3px;
+    border: 1px solid var(--to-border-strong);
+    margin-left: 4px;
+}
+.teamorga-ucp-overdue { color: var(--to-danger, #a94442); border-color: var(--to-danger, #a94442); }
+.teamorga-ucp-today   { color: var(--to-warning, #8a6d3b); border-color: var(--to-warning, #8a6d3b); }
+.teamorga-ucp-reminder-badge { color: var(--to-info, #31708f); border-color: var(--to-info, #31708f); margin-left: 0; }
