@@ -2228,7 +2228,7 @@ function teamorga_ucp_collect(int $uid): array
         JOIN " . TABLE_PREFIX . "teamorga_topic tt ON tt.id = tp.tt_id
         JOIN " . TABLE_PREFIX . "threads t ON t.tid = tt.tid
         WHERE tp.uid = {$uid}
-          AND tp.status IN ('unanswered','pending')
+          AND tp.status = 'unanswered'
           AND tt.prio != 'inactive'
           AND t.visible = 1
     ");
