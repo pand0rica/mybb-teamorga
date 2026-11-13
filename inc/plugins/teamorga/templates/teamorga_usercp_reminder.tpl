@@ -1,4 +1,4 @@
-<li class="teamorga-ucp-item teamorga-ucp-reminder {$rem_class}">
+<div class="teamorga-ucp-item teamorga-ucp-reminder {$rem_class}">
 	<div class="teamorga-ucp-head">
 		<span class="teamorga-ucp-badge teamorga-ucp-reminder-badge">{$lang->teamorga_ucp_badge_reminder}</span>
 		<strong class="teamorga-ucp-title">{$rem_title}</strong>
@@ -20,4 +20,4 @@
 			<input type="submit" class="button" value="{$lang->teamorga_ucp_reminder_delete}" />
 		</form>
 	</div>
-</li>
+</div>

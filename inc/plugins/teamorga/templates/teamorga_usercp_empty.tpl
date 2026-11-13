@@ -1,1 +1,1 @@
-<li class="teamorga-ucp-empty">{$lang->teamorga_ucp_no_tasks}</li>
+<div class="teamorga-ucp-empty">{$lang->teamorga_ucp_no_tasks}</div>

@@ -2430,7 +2430,7 @@ function teamorga_usercp(): void
                 "task_deadline"    => $has_date ? teamorga_ucp_format_date($d["deadline"]) : htmlspecialchars_uni($lang->teamorga_ucp_no_deadline),
                 "task_badge"       => $badge($d["deadline"]),
                 "task_owner"       => htmlspecialchars_uni($d["owner"]),
-                "task_topic_open"  => $d["topic_open"] ? "&middot; " . htmlspecialchars_uni($lang->teamorga_ucp_participation_open) : "",
+                "task_topic_open"  => $d["topic_open"] ? htmlspecialchars_uni($lang->teamorga_ucp_participation_open) : "",
                 "task_suggestions" => $suggestions,
             ]);
         } else {

@@ -786,38 +786,57 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 }
 
 /* ============================================================
-   UserCP: team tasks page
+   UserCP: team tasks page (plain blocks, independent of theme list styles)
    ============================================================ */
-.teamorga-ucp-list { list-style: none; margin: 0; padding: 0; }
+.teamorga-ucp-intro { margin: 0; padding: 10px 14px 4px; color: var(--to-text-dim); font-weight: normal; }
+.teamorga-ucp-list { display: block; padding: 8px 14px 6px; }
 .teamorga-ucp-item {
+    display: block;
+    width: auto;
+    float: none;
+    box-sizing: border-box;
+    margin: 0 0 8px;
+    padding: 8px 12px;
+    background: var(--to-bg-subtle);
     border: 1px solid var(--to-border);
     border-left: 4px solid var(--to-border-strong);
-    background: var(--to-bg);
     border-radius: 3px;
-    margin: 0 0 8px;
-    padding: 8px 10px;
 }
 .teamorga-ucp-item.teamorga-high   { border-left-color: var(--to-danger, #a94442); }
 .teamorga-ucp-item.teamorga-medium { border-left-color: var(--to-warning, #8a6d3b); }
 .teamorga-ucp-item.teamorga-normal { border-left-color: var(--to-accent); }
 .teamorga-ucp-item.teamorga-low    { border-left-color: var(--to-success); }
-.teamorga-ucp-reminder { border-left-color: var(--to-info, #31708f) !important; }
+.teamorga-ucp-item.teamorga-ucp-reminder { border-left-color: var(--to-info, #31708f); }
 .teamorga-ucp-done { opacity: 0.6; }
-.teamorga-ucp-head { margin-bottom: 2px; }
-.teamorga-ucp-title { font-weight: bold; }
-.teamorga-ucp-meta, .teamorga-ucp-preview { color: var(--to-text-dim); font-size: 0.9em; }
-.teamorga-ucp-note { margin: 4px 0; }
-.teamorga-ucp-suggestions { margin: 6px 0 0 18px; padding: 0; }
-.teamorga-ucp-actions { margin-top: 6px; }
-.teamorga-ucp-empty { color: var(--to-text-muted); padding: 6px 0; }
+.teamorga-ucp-head { display: block; margin: 0 0 4px; }
+.teamorga-ucp-title { font-weight: bold; margin-right: 6px; }
+.teamorga-ucp-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+    color: var(--to-text-dim);
+    font-size: 0.85em;
+    font-weight: normal;
+}
+.teamorga-ucp-meta span:empty { display: none; }
+.teamorga-ucp-note { display: block; margin: 6px 0 0; font-weight: normal; }
+.teamorga-ucp-suggestions { display: block; margin: 8px 0 0; padding: 6px 0 0; border-top: 1px dashed var(--to-border); }
+.teamorga-ucp-suggestions:empty { display: none; }
+.teamorga-ucp-sug { display: flex; align-items: baseline; gap: 8px; margin: 3px 0; }
+.teamorga-ucp-sug .teamorga-sug-link { flex: 0 0 auto; }
+.teamorga-ucp-preview { color: var(--to-text-dim); font-size: 0.85em; font-weight: normal; }
+.teamorga-ucp-actions { display: block; margin: 8px 0 0; }
+.teamorga-ucp-empty { padding: 6px 0; color: var(--to-text-muted); font-weight: normal; }
 .teamorga-ucp-badge {
     display: inline-block;
-    font-size: 0.8em;
+    font-size: 0.75em;
+    font-weight: normal;
+    line-height: 1.5;
     padding: 0 6px;
     border-radius: 3px;
     border: 1px solid var(--to-border-strong);
-    margin-left: 4px;
+    vertical-align: middle;
 }
 .teamorga-ucp-overdue { color: var(--to-danger, #a94442); border-color: var(--to-danger, #a94442); }
 .teamorga-ucp-today   { color: var(--to-warning, #8a6d3b); border-color: var(--to-warning, #8a6d3b); }
-.teamorga-ucp-reminder-badge { color: var(--to-info, #31708f); border-color: var(--to-info, #31708f); margin-left: 0; }
+.teamorga-ucp-reminder-badge { color: var(--to-info, #31708f); border-color: var(--to-info, #31708f); margin-right: 6px; }

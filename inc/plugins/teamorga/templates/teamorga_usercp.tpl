@@ -12,9 +12,9 @@
 	<div class="teamorga-box">
 		<h3>{$lang->teamorga_ucp_open_tasks}</h3>
 		<p class="teamorga-ucp-intro">{$lang->teamorga_ucp_intro}</p>
-		<ul class="teamorga-ucp-list">
+		<div class="teamorga-ucp-list">
 			{$task_list}
-		</ul>
+		</div>
 	</div>
 	<div class="teamorga-box">
 		<h3>{$lang->teamorga_ucp_reminder_add}</h3>
@@ -22,9 +22,9 @@
 	</div>
 	<div class="teamorga-box">
 		<h3>{$lang->teamorga_ucp_reminders_done}</h3>
-		<ul class="teamorga-ucp-list">
+		<div class="teamorga-ucp-list">
 			{$done_list}
-		</ul>
+		</div>
 	</div>
 </td>
 </tr>
