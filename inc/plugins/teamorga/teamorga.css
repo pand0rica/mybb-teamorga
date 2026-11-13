@@ -788,7 +788,7 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 /* ============================================================
    UserCP: team tasks page (plain blocks, independent of theme list styles)
    ============================================================ */
-.teamorga-ucp-intro { margin: 0; padding: 10px 14px 4px; color: var(--to-text-dim); font-size: 1em; font-weight: normal; }
+.teamorga-ucp-intro { margin: 0; padding: 10px 14px 4px; color: var(--to-text-dim); font-weight: normal; }
 .teamorga-ucp-list { display: block; padding: 8px 14px 6px; }
 .teamorga-ucp-item {
     display: block;
@@ -809,13 +809,13 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 .teamorga-ucp-item.teamorga-ucp-reminder { border-left-color: var(--to-info, #31708f); }
 .teamorga-ucp-done { opacity: 0.6; }
 .teamorga-ucp-head { display: block; margin: 0 0 4px; }
-.teamorga-ucp-title { font-weight: bold; font-size: 1.1em; margin-right: 6px; }
+.teamorga-ucp-title { font-weight: bold; margin-right: 6px; }
 .teamorga-ucp-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 2px 14px;
     color: var(--to-text-dim);
-    font-size: 1em;
+   
     font-weight: normal;
 }
 .teamorga-ucp-meta span:empty { display: none; }
@@ -823,14 +823,13 @@ details.teamorga-suggestion-box[open] > summary .teamorga-suggestion-author::bef
 .teamorga-ucp-suggestions { display: block; margin: 8px 0 0; padding: 6px 0 0; border-top: 1px dashed var(--to-border); }
 .teamorga-ucp-suggestions:empty { display: none; }
 .teamorga-ucp-sug { display: flex; align-items: baseline; gap: 8px; margin: 3px 0; }
-.teamorga-ucp-sug .teamorga-sug-link { flex: 0 0 auto; }
-.teamorga-ucp-preview { color: var(--to-text-dim); font-size: 1em; font-weight: normal; }
-.teamorga-ucp-sug .teamorga-sug-link { font-size: 0.95em; }
+.teamorga-ucp-sug .teamorga-sug-link { flex: 0 0 auto; font-size: inherit; }
+.teamorga-ucp-preview { color: var(--to-text-dim); font-weight: normal; }
 .teamorga-ucp-actions { display: block; margin: 8px 0 0; }
 .teamorga-ucp-empty { padding: 6px 0; color: var(--to-text-muted); font-weight: normal; }
 .teamorga-ucp-badge {
     display: inline-block;
-    font-size: 0.9em;
+   
     font-weight: normal;
     line-height: 1.5;
     padding: 0 6px;
