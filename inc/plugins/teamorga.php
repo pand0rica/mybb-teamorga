@@ -3,7 +3,7 @@
  * Teamorga – Team organisation plugin for MyBB 1.8
  *
  * @author   pand0rica
- * @version  1.2.0
+ * @version  1.3.0
  */
 
 // Disallow direct access to this file for security reasons
@@ -22,6 +22,8 @@ if (!isset($mybb->settings["teamorga_enabled"]) || $mybb->settings["teamorga_ena
     $plugins->add_hook("datahandler_post_insert_post_end", "teamorga_on_post_insert");
     $plugins->add_hook("postbit", "teamorga_postbit");
     $plugins->add_hook("global_start", "teamorga_myalerts_register");
+    $plugins->add_hook("usercp_menu", "teamorga_usercp_menu", 40);
+    $plugins->add_hook("usercp_start", "teamorga_usercp");
 
     // Register forum-specific hooks only for enabled forums
     if (teamorga_is_forum_enabled()) {
@@ -168,7 +170,7 @@ function teamorga_info()
         "website"     => "",
         "author"      => "pand0rica",
         "authorsite"  => "",
-        "version"     => "1.2.0",
+        "version"     => "1.3.0",
         "guid"        => "",
         "codename"    => "teamorga",
         "compatibility" => "18*"
@@ -285,6 +287,27 @@ function teamorga_install()
         `status`            varchar(50) NOT NULL DEFAULT 'unanswered',
         `proposed_deadline` varchar(10) NOT NULL DEFAULT ''
     ) ENGINE=MyISAM;");
+
+    teamorga_create_reminders_table();
+}
+
+/**
+ * Private per-user reminders shown on the UserCP page (idempotent).
+ */
+function teamorga_create_reminders_table(): void
+{
+    global $db;
+
+    $db->query("CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "teamorga_reminders` (
+        `id`          int          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `uid`         int          NOT NULL,
+        `title`       varchar(255) NOT NULL DEFAULT '',
+        `note`        text         NULL,
+        `remind_date` varchar(10)  NOT NULL DEFAULT '',
+        `done`        tinyint(1)   NOT NULL DEFAULT 0,
+        `dateline`    int(10)      NOT NULL DEFAULT 0,
+        KEY `uid` (`uid`)
+    ) ENGINE=MyISAM;");
 }
 
 function teamorga_is_installed()
@@ -313,6 +336,7 @@ function teamorga_uninstall()
     $db->drop_table("teamorga_suggestions");
     $db->drop_table("teamorga_suggestion_participants");
     $db->drop_table("teamorga_topic_participants");
+    $db->drop_table("teamorga_reminders");
 }
 
 function teamorga_activate()
@@ -407,6 +431,9 @@ function teamorga_activate()
         $db->query("ALTER TABLE `" . TABLE_PREFIX . "teamorga_topic_participants`
             ADD COLUMN `proposed_deadline` varchar(10) NOT NULL DEFAULT ''");
     }
+
+    // Reminders table (upgrade path for installs older than 1.3.0)
+    teamorga_create_reminders_table();
 
     // Register MyAlerts alert type
     if (function_exists('myalerts_is_activated') && myalerts_is_activated()
@@ -2054,6 +2081,373 @@ function teamorga_build_suggestion_links(int $ttid, int $tid): array
 
     usort($entries, fn($a, $b) => $a["label"] <=> $b["label"]);
     return array_column($entries, "html");
+}
+
+// ============================================================================
+// USERCP: "MY TEAM TASKS" PAGE + PRIVATE REMINDERS
+// ============================================================================
+
+/**
+ * Add the "Team tasks" link to the UserCP navigation (team members only).
+ */
+function teamorga_usercp_menu(): void
+{
+    global $mybb, $templates, $lang;
+
+    if ((int) $mybb->user["uid"] < 1 || !teamorga_is_group_allowed()) {
+        return;
+    }
+
+    teamorga_load_lang();
+
+    // get() makes sure the raw template is in the cache before we modify it
+    $templates->get("usercp_nav_misc");
+    $raw  = isset($templates->cache["usercp_nav_misc"]) ? (string) $templates->cache["usercp_nav_misc"] : "";
+    $item = '<tr><td class="trow1 smalltext"><a href="usercp.php?action=teamorga" class="usercp_nav_item usercp_nav_teamorga">'
+        . htmlspecialchars_uni($lang->teamorga_ucp_nav) . '</a></td></tr>';
+
+    $pos = strripos($raw, "</tbody>");
+    if ($pos !== false) {
+        $raw = substr($raw, 0, $pos) . $item . substr($raw, $pos);
+    } else {
+        $raw .= $item;
+    }
+    $templates->cache["usercp_nav_misc"] = $raw;
+}
+
+/**
+ * Render a plugin template with the given local variables.
+ */
+function teamorga_render_tpl(string $name, array $vars = []): string
+{
+    global $templates, $lang, $mybb, $theme, $headerinclude, $header, $footer, $usercpnav;
+
+    extract($vars, EXTR_SKIP);
+    $out = "";
+    eval("\$out = \"" . $templates->get($name) . "\";");
+    return $out;
+}
+
+/**
+ * Format a stored 'Y-m-d' date as d.m.Y (same display format as the rest of the plugin).
+ */
+function teamorga_ucp_format_date(string $date): string
+{
+    $dt = DateTime::createFromFormat("Y-m-d", $date);
+    return $dt ? $dt->format("d.m.Y") : $date;
+}
+
+/**
+ * Validate a 'Y-m-d' date string.
+ */
+function teamorga_ucp_valid_date(string $date): bool
+{
+    if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m)) {
+        return false;
+    }
+    return checkdate((int) $m[2], (int) $m[3], (int) $m[1]);
+}
+
+/**
+ * Collect the open Teamorga tasks of a user: topics with an unanswered participation and/or
+ * suggestions without the user's vote, grouped per topic.
+ */
+function teamorga_ucp_collect(int $uid): array
+{
+    global $db;
+
+    $groups    = [];
+    $perm_seen = [];
+
+    $topic_cols = "tt.id AS ttid, tt.tid, tt.deadline, tt.prio, tt.owner, t.subject, t.fid";
+
+    $add_group = function (array $row) use (&$groups, &$perm_seen) {
+        $ttid = (int) $row["ttid"];
+        if (isset($groups[$ttid])) {
+            return true;
+        }
+        $fid = (int) $row["fid"];
+        if (!isset($perm_seen[$fid])) {
+            $fp = forum_permissions($fid);
+            $perm_seen[$fid] = !empty($fp["canview"]);
+        }
+        if (!$perm_seen[$fid]) {
+            return false;
+        }
+        $groups[$ttid] = [
+            "ttid"        => $ttid,
+            "tid"         => (int) $row["tid"],
+            "subject"     => (string) $row["subject"],
+            "deadline"    => (string) $row["deadline"],
+            "prio"        => (string) $row["prio"],
+            "owner"       => (string) ($row["owner"] ?? ""),
+            "topic_open"  => false,
+            "suggestions" => [],
+        ];
+        return true;
+    };
+
+    // Topics where the participation is still unanswered
+    $q = $db->query("
+        SELECT {$topic_cols}
+        FROM " . TABLE_PREFIX . "teamorga_topic_participants tp
+        JOIN " . TABLE_PREFIX . "teamorga_topic tt ON tt.id = tp.tt_id
+        JOIN " . TABLE_PREFIX . "threads t ON t.tid = tt.tid
+        WHERE tp.uid = {$uid}
+          AND tp.status IN ('unanswered','pending')
+          AND tt.prio != 'inactive'
+          AND t.visible = 1
+    ");
+    while ($row = $db->fetch_array($q)) {
+        if ($add_group($row)) {
+            $groups[(int) $row["ttid"]]["topic_open"] = true;
+        }
+    }
+
+    // Suggestions still waiting for the user's vote, in the order of their posts
+    $q = $db->query("
+        SELECT {$topic_cols}, s.id AS sug_id, s.pid, s.suggestion
+        FROM " . TABLE_PREFIX . "teamorga_suggestion_participants sp
+        JOIN " . TABLE_PREFIX . "teamorga_suggestions s ON s.id = sp.sug_id
+        JOIN " . TABLE_PREFIX . "teamorga_topic tt ON tt.id = s.tt_id
+        JOIN " . TABLE_PREFIX . "threads t ON t.tid = tt.tid
+        JOIN " . TABLE_PREFIX . "posts p ON p.pid = s.pid AND p.tid = tt.tid
+        WHERE sp.uid = {$uid}
+          AND sp.status IN ('pending','unanswered','time')
+          AND s.active = 1
+          AND s.pid IS NOT NULL
+          AND tt.prio != 'inactive'
+          AND t.visible = 1
+        ORDER BY p.dateline ASC, s.pid ASC
+    ");
+    while ($row = $db->fetch_array($q)) {
+        if (!$add_group($row)) {
+            continue;
+        }
+        $tid = (int) $row["tid"];
+        $pid = (int) $row["pid"];
+        $num = (int) $db->fetch_field(
+            $db->simple_select("posts", "COUNT(*) AS cnt", "tid={$tid} AND pid<={$pid}"),
+            "cnt"
+        );
+        $groups[(int) $row["ttid"]]["suggestions"][] = [
+            "label"   => $num > 0 ? $num : (int) $row["sug_id"],
+            "href"    => get_post_link($pid, $tid) . "#pid{$pid}",
+            "preview" => mb_substr(strip_tags((string) $row["suggestion"]), 0, 80),
+        ];
+    }
+
+    return array_values($groups);
+}
+
+/**
+ * Handle the POST actions of the page (add / toggle / delete a reminder). Always redirects.
+ */
+function teamorga_ucp_handle_post(int $uid, string $do): void
+{
+    global $mybb, $db, $lang;
+
+    verify_post_check($mybb->get_input("my_post_key"));
+    $url = "usercp.php?action=teamorga";
+
+    if ($do === "add_reminder") {
+        $title = trim($mybb->get_input("reminder_title"));
+        $note  = trim($mybb->get_input("reminder_note"));
+        $date  = trim($mybb->get_input("reminder_date"));
+
+        if ($title === "") {
+            error($lang->teamorga_ucp_err_title);
+        }
+        if (!teamorga_ucp_valid_date($date)) {
+            error($lang->teamorga_ucp_err_date);
+        }
+
+        $db->insert_query("teamorga_reminders", [
+            "uid"         => $uid,
+            "title"       => $db->escape_string(mb_substr($title, 0, 255)),
+            "note"        => $db->escape_string(mb_substr($note, 0, 2000)),
+            "remind_date" => $db->escape_string($date),
+            "done"        => 0,
+            "dateline"    => TIME_NOW,
+        ]);
+        redirect($url, $lang->teamorga_ucp_msg_added);
+    }
+
+    $rid = $mybb->get_input("reminder_id", MyBB::INPUT_INT);
+    $row = $db->fetch_array(
+        $db->simple_select("teamorga_reminders", "id, done", "id={$rid} AND uid={$uid}", ["limit" => 1])
+    );
+    if (!$row) {
+        error($lang->teamorga_ucp_err_not_found);
+    }
+
+    if ($do === "toggle_reminder") {
+        $db->update_query("teamorga_reminders", ["done" => $row["done"] ? 0 : 1], "id={$rid} AND uid={$uid}");
+        redirect($url, $lang->teamorga_ucp_msg_updated);
+    }
+
+    if ($do === "delete_reminder") {
+        $db->delete_query("teamorga_reminders", "id={$rid} AND uid={$uid}");
+        redirect($url, $lang->teamorga_ucp_msg_deleted);
+    }
+
+    redirect($url);
+}
+
+/**
+ * UserCP page: usercp.php?action=teamorga
+ */
+function teamorga_usercp(): void
+{
+    global $mybb, $db, $lang, $templates, $theme, $headerinclude, $header, $footer, $usercpnav;
+
+    if ($mybb->get_input("action") !== "teamorga") {
+        return;
+    }
+
+    $uid = (int) $mybb->user["uid"];
+    if ($uid < 1 || !teamorga_is_group_allowed()) {
+        error_no_permission();
+    }
+
+    teamorga_load_lang();
+
+    $do = $mybb->get_input("teamorga_do");
+    if ($mybb->request_method === "post" && $do !== "") {
+        teamorga_ucp_handle_post($uid, $do);
+    }
+
+    add_breadcrumb($lang->nav_usercp, "usercp.php");
+    add_breadcrumb($lang->teamorga_ucp_title, "usercp.php?action=teamorga");
+
+    $today = my_date("Y-m-d", TIME_NOW);
+    $far   = "9999-12-31";
+
+    // Build one sortable list from topics and open reminders
+    $items = [];
+    foreach (teamorga_ucp_collect($uid) as $g) {
+        $valid = teamorga_ucp_valid_date($g["deadline"]);
+        $items[] = [
+            "type" => 0,
+            "date" => $valid ? $g["deadline"] : $far,
+            "id"   => $g["ttid"],
+            "data" => $g,
+        ];
+    }
+
+    $done_rows = [];
+    $q = $db->simple_select("teamorga_reminders", "*", "uid={$uid}", ["order_by" => "remind_date ASC, id", "order_dir" => "ASC"]);
+    while ($r = $db->fetch_array($q)) {
+        if ((int) $r["done"] === 1) {
+            $done_rows[] = $r;
+            continue;
+        }
+        $items[] = [
+            "type" => 1,
+            "date" => teamorga_ucp_valid_date($r["remind_date"]) ? $r["remind_date"] : $far,
+            "id"   => (int) $r["id"],
+            "data" => $r,
+        ];
+    }
+
+    usort($items, function ($a, $b) {
+        if ($a["date"] !== $b["date"]) {
+            return strcmp($a["date"], $b["date"]);
+        }
+        if ($a["type"] !== $b["type"]) {
+            return $a["type"] <=> $b["type"];
+        }
+        return $a["id"] <=> $b["id"];
+    });
+
+    $badge = function (string $date) use ($today, $lang): string {
+        if ($date === "" || !teamorga_ucp_valid_date($date)) {
+            return "";
+        }
+        if ($date < $today) {
+            return '<span class="teamorga-ucp-badge teamorga-ucp-overdue">' . htmlspecialchars_uni($lang->teamorga_ucp_overdue) . '</span>';
+        }
+        if ($date === $today) {
+            return '<span class="teamorga-ucp-badge teamorga-ucp-today">' . htmlspecialchars_uni($lang->teamorga_ucp_today) . '</span>';
+        }
+        return "";
+    };
+
+    $task_list = "";
+    foreach ($items as $it) {
+        $d = $it["data"];
+
+        if ($it["type"] === 0) {
+            $suggestions = "";
+            foreach ($d["suggestions"] as $s) {
+                $suggestions .= teamorga_render_tpl("teamorga_usercp_suggestion", [
+                    "sug_href"    => htmlspecialchars_uni($s["href"]),
+                    "sug_label"   => htmlspecialchars_uni($lang->sprintf($lang->teamorga_suggestion_link, $s["label"])),
+                    "sug_preview" => htmlspecialchars_uni($s["preview"]),
+                ]);
+            }
+
+            $prio     = in_array($d["prio"], ["low", "normal", "medium", "high"], true) ? $d["prio"] : "normal";
+            $prio_key = "teamorga_prio_" . $prio;
+            $has_date = teamorga_ucp_valid_date($d["deadline"]);
+
+            $task_list .= teamorga_render_tpl("teamorga_usercp_task", [
+                "task_href"        => htmlspecialchars_uni(get_thread_link($d["tid"])),
+                "task_subject"     => htmlspecialchars_uni($d["subject"]),
+                "task_prio_class"  => "teamorga-" . $prio,
+                "task_prio_label"  => htmlspecialchars_uni($lang->$prio_key),
+                "task_deadline"    => $has_date ? teamorga_ucp_format_date($d["deadline"]) : htmlspecialchars_uni($lang->teamorga_ucp_no_deadline),
+                "task_badge"       => $badge($d["deadline"]),
+                "task_owner"       => htmlspecialchars_uni($d["owner"]),
+                "task_topic_open"  => $d["topic_open"] ? "&middot; " . htmlspecialchars_uni($lang->teamorga_ucp_participation_open) : "",
+                "task_suggestions" => $suggestions,
+            ]);
+        } else {
+            $task_list .= teamorga_ucp_render_reminder($d, $badge($d["remind_date"]));
+        }
+    }
+
+    if ($task_list === "") {
+        $task_list = teamorga_render_tpl("teamorga_usercp_empty");
+    }
+
+    $done_list = "";
+    foreach ($done_rows as $r) {
+        $done_list .= teamorga_ucp_render_reminder($r, "");
+    }
+
+    $reminder_form = teamorga_render_tpl("teamorga_usercp_reminder_form", [
+        "form_date" => htmlspecialchars_uni($today),
+    ]);
+
+    $page = teamorga_render_tpl("teamorga_usercp", [
+        "task_list"     => $task_list,
+        "done_list"     => $done_list,
+        "reminder_form" => $reminder_form,
+    ]);
+
+    output_page($page);
+    exit;
+}
+
+/**
+ * Render a single reminder row.
+ */
+function teamorga_ucp_render_reminder(array $r, string $badge): string
+{
+    $done = (int) $r["done"] === 1;
+    global $lang;
+
+    return teamorga_render_tpl("teamorga_usercp_reminder", [
+        "rem_id"         => (int) $r["id"],
+        "rem_title"      => htmlspecialchars_uni($r["title"]),
+        "rem_note"       => nl2br(htmlspecialchars_uni((string) $r["note"])),
+        "rem_date"       => teamorga_ucp_format_date((string) $r["remind_date"]),
+        "rem_badge"      => $badge,
+        "rem_class"      => $done ? "teamorga-ucp-done" : "",
+        "rem_delete_confirm" => htmlspecialchars_uni(addslashes($lang->teamorga_ucp_reminder_delete_confirm)),
+        "rem_toggle_lbl" =>htmlspecialchars_uni($done ? $lang->teamorga_ucp_reminder_reopen : $lang->teamorga_ucp_reminder_done),
+    ]);
 }
 
 // ============================================================================

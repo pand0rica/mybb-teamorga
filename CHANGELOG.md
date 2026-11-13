@@ -6,6 +6,11 @@ All notable changes to Teamorga are documented here.
 
 ## [Unreleased]
 
+### Added
+- **UserCP page "My team tasks"** (`usercp.php?action=teamorga`): open topics and unvoted suggestions of the current team member, sorted by deadline (suggestions by post order).
+- **Private reminders** on that page (title, date, note; mark done, reopen, delete) in the new table `teamorga_reminders`.
+- Upgrade: deactivate and reactivate the plugin to create the table and load the new templates.
+
 ### Fixed
 - **MyAlerts notifications silently stopped firing** (suggestion reactions, time
   proposals) once the alert types went missing from the `alert_types` table. Root

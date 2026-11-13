@@ -1,6 +1,6 @@
 # Teamorga
 
-**Version 1.2.0** – Team organisation plugin for MyBB 1.8
+**Version 1.3.0** – Team organisation plugin for MyBB 1.8
 
 Teamorga helps teams coordinate decisions in the forum. Threads can be marked as "Teamorga topics" with a deadline and priority. Team members register their participation, submit suggestions (via replies), and vote on them. The forum index shows reminders for open items.
 
@@ -114,6 +114,16 @@ The forum index shows alerts for:
 - Active topics without an owner (for editor groups).
 
 ![Index alerts](docs/screenshots/index-alerts.png)
+
+#### My team tasks (UserCP)
+
+Team members get a **My team tasks** page: **User CP** (link *User Control Panel* in the header) **→ Misc → My team tasks**.
+
+- Lists every topic where your participation is still open and every suggestion you have not voted on yet.
+- Topics are sorted by deadline (overdue first, topics without deadline last); suggestions within a topic follow the order of their posts.
+- **Private reminders:** fill in *Title*, *Date* and an optional *Note* under **New reminder** and click **Save reminder**. Reminders appear in the same list, sorted by their date. Use **Mark done** to move one to *Completed reminders* (**Reopen** brings it back) or **Delete** to remove it. Reminders are only visible to you and send no notification.
+
+![My team tasks](docs/screenshots/usercp-tasks.png)
 
 ---
 
