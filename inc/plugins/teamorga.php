@@ -416,6 +416,8 @@ function teamorga_activate()
         "#" . preg_quote('<td id="posts_container">') . "#i",
         '<td id="posts_container">{$teamorga_showthread}'
     );
+    // Remove earlier injections first: every reactivation used to add one more copy
+    find_replace_templatesets("index", "#" . preg_quote('{$teamorga_index_alerts}') . "#i", '', 0);
     find_replace_templatesets(
         "index",
         "#" . preg_quote('{$header}') . "#i",
