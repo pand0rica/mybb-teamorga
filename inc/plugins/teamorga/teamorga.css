@@ -389,6 +389,18 @@
     display: inline-block;
     list-style: none;
     cursor: pointer;
+    padding: 5px 14px;
+    background: var(--to-btn-bg);
+    color: var(--to-text);
+    border: 1px solid var(--to-border-strong);
+    border-radius: var(--to-radius);
+    font-size: var(--to-font-size);
+    line-height: 1.4;
+    transition: background var(--to-t);
+}
+
+.teamorga-suggestion-add-toggle > summary:hover {
+    background: var(--to-btn-hover-bg);
 }
 
 .teamorga-suggestion-add-toggle > summary::-webkit-details-marker {
