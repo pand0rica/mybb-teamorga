@@ -381,6 +381,10 @@
     overflow: hidden;
 }
 
+.teamorga-suggestion-add {
+    margin: 10px 14px;
+}
+
 .teamorga-suggestion-box.inactive {
     opacity: .7;
 }
