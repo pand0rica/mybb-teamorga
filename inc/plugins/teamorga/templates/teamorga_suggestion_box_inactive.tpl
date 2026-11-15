@@ -1,4 +1,4 @@
-<details class="teamorga-suggestion-box inactive">
+<details class="teamorga-suggestion-box inactive" id="teamorga_sug_{$post['pid']}">
 	<summary class="teamorga-suggestion-head">
 		<span class="teamorga-suggestion-author"><em>{$teamorga_suggestion_by}</em></span>
 		<span class="teamorga-suggestion-head-right">{$teamorga_edit_button}{$teamorga_toggle_suggestion_button}</span>

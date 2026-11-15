@@ -1338,21 +1338,12 @@ function teamorga_postbit_add_suggestion(array &$post): void
             teamorga_create_suggestion((int) $topic["id"], $post_pid, $uid, $text);
         }
 
-        redirect("showthread.php?tid={$post_tid}&pid={$post_pid}#pid{$post_pid}", $lang->teamorga_msg_suggestion_added);
+        // Land on the new suggestion block (not the post top) so the scroll position stays put
+        redirect("showthread.php?tid={$post_tid}&pid={$post_pid}#teamorga_sug_{$post_pid}", $lang->teamorga_msg_suggestion_added);
     }
 
-    $current_page = $mybb->get_input("page", MyBB::INPUT_INT);
-
-    // --- GET: show the form ---
-    if ($action === "add_suggestion" && $target === $post_pid) {
-        $teamorga_suggestion_value = htmlspecialchars_uni($mybb->get_input("new_suggestion"));
-        $teamorga_cancel_page_field = $current_page > 1 ? '<input type="hidden" name="page" value="' . $current_page . '" />' : "";
-        eval("\$post[\"teamorga\"] = \"" . $templates->get("teamorga_suggestion_add_form") . "\";");
-        return;
-    }
-
-    // --- Default: show the "add suggestion" button ---
-    $teamorga_add_page_field = $current_page > 1 ? '<input type="hidden" name="page" value="' . $current_page . '" />' : "";
+    // Collapsible form (no page reload, so the scroll position never changes)
+    $teamorga_add_open = "";
     eval("\$post[\"teamorga\"] = \"" . $templates->get("teamorga_suggestion_add_button") . "\";");
 }
 
