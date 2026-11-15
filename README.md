@@ -89,6 +89,8 @@ Inactive topics are treated as done and show no pending CTA.
 2. Fill in the **suggestion field** that appears above the reply form.
 3. Post the reply – a voting block appears directly on your post.
 
+**Forgot to add one?** Under each of your own posts in a Teamorga thread that has no suggestion yet, there is an **Add suggestion** button. Click it, enter the text and click **Save** – the post is opened for voting just like a suggestion submitted with the reply. Each post can carry one suggestion.
+
 #### Voting on suggestions
 
 Each post with a suggestion shows voting buttons for all active participants:

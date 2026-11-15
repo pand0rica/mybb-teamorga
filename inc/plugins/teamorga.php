@@ -1259,27 +1259,101 @@ function teamorga_on_post_insert(&$post)
         return;
     }
 
-    $tt_id         = (int) $topic["id"];
-    $suggestion_id = $db->insert_query("teamorga_suggestions", [
+    teamorga_create_suggestion((int) $topic["id"], $pid, $poster_uid, $new_suggestion);
+}
+
+/**
+ * Create a suggestion for a post and enroll all non-abstaining topic participants.
+ * The author automatically votes "approved". Returns the new suggestion ID.
+ */
+function teamorga_create_suggestion(int $tt_id, int $pid, int $poster_uid, string $text): int
+{
+    global $db;
+
+    $suggestion_id = (int) $db->insert_query("teamorga_suggestions", [
         "tt_id"      => $tt_id,
-        "suggestion" => $db->escape_string($new_suggestion),
+        "suggestion" => $db->escape_string($text),
         "owner_uid"  => $poster_uid,
         "pid"        => $pid,
         "dateline"   => TIME_NOW,
         "active"     => 1
     ]);
 
-    // Add all non-abstaining topic participants; poster votes "approved" automatically
     $participants_q = $db->query("SELECT uid FROM " . TABLE_PREFIX . "teamorga_topic_participants WHERE tt_id={$tt_id} AND status!='abstain'");
     while ($prow = $db->fetch_array($participants_q)) {
         $participant_uid = (int) $prow["uid"];
         $db->insert_query("teamorga_suggestion_participants", [
             "uid"    => $participant_uid,
             "tt_id"  => $tt_id,
-            "sug_id" => (int) $suggestion_id,
+            "sug_id" => $suggestion_id,
             "status" => ($participant_uid === $poster_uid) ? "approved" : "pending"
         ]);
     }
+
+    return $suggestion_id;
+}
+
+/**
+ * postbit helper – for a post WITHOUT a suggestion: let its author add one
+ * afterwards. Handles the POST save and renders the button / form.
+ */
+function teamorga_postbit_add_suggestion(array &$post): void
+{
+    global $mybb, $db, $templates, $lang;
+
+    $uid = (int) $mybb->user["uid"];
+    if ($uid <= 0 || (int) $post["uid"] !== $uid || !teamorga_is_group_allowed()) {
+        return;
+    }
+
+    static $topic_cache = [];
+    $post_tid = (int) $post["tid"];
+    if (!array_key_exists($post_tid, $topic_cache)) {
+        $topic_cache[$post_tid] = teamorga_get_topic($post_tid);
+    }
+    $topic = $topic_cache[$post_tid];
+    if (!$topic) {
+        return;
+    }
+
+    $post_pid = (int) $post["pid"];
+    $action   = $mybb->get_input("teamorga_action");
+    $target   = $mybb->get_input("pid", MyBB::INPUT_INT);
+
+    // --- POST: save a new suggestion for this post ---
+    if ($mybb->request_method === "post" && $action === "add_suggestion_save" && $target === $post_pid) {
+        verify_post_check($mybb->get_input("my_post_key"));
+
+        $text = trim($mybb->get_input("new_suggestion"));
+        if ($text === "") {
+            error($lang->teamorga_err_suggestion_empty);
+        }
+
+        // Only one suggestion per post (also guards against double submits)
+        $exists = (int) $db->fetch_field(
+            $db->simple_select("teamorga_suggestions", "id", "pid={$post_pid}"),
+            "id"
+        );
+        if (!$exists) {
+            teamorga_create_suggestion((int) $topic["id"], $post_pid, $uid, $text);
+        }
+
+        redirect("showthread.php?tid={$post_tid}&pid={$post_pid}#pid{$post_pid}", $lang->teamorga_msg_suggestion_added);
+    }
+
+    $current_page = $mybb->get_input("page", MyBB::INPUT_INT);
+
+    // --- GET: show the form ---
+    if ($action === "add_suggestion" && $target === $post_pid) {
+        $teamorga_suggestion_value = htmlspecialchars_uni($mybb->get_input("new_suggestion"));
+        $teamorga_cancel_page_field = $current_page > 1 ? '<input type="hidden" name="page" value="' . $current_page . '" />' : "";
+        eval("\$post[\"teamorga\"] = \"" . $templates->get("teamorga_suggestion_add_form") . "\";");
+        return;
+    }
+
+    // --- Default: show the "add suggestion" button ---
+    $teamorga_add_page_field = $current_page > 1 ? '<input type="hidden" name="page" value="' . $current_page . '" />' : "";
+    eval("\$post[\"teamorga\"] = \"" . $templates->get("teamorga_suggestion_add_button") . "\";");
 }
 
 /**
@@ -1319,6 +1393,7 @@ function teamorga_postbit(&$post)
         $db->simple_select("teamorga_suggestions", "*", "pid=" . (int) $post["pid"])
     );
     if (!$suggestion) {
+        teamorga_postbit_add_suggestion($post);
         return;
     }
 
