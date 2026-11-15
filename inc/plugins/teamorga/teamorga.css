@@ -385,6 +385,20 @@
     margin: 10px 14px;
 }
 
+.teamorga-suggestion-add-toggle > summary {
+    display: inline-block;
+    list-style: none;
+    cursor: pointer;
+}
+
+.teamorga-suggestion-add-toggle > summary::-webkit-details-marker {
+    display: none;
+}
+
+.teamorga-suggestion-add-toggle[open] > summary {
+    margin-bottom: 8px;
+}
+
 .teamorga-suggestion-box.inactive {
     opacity: .7;
 }
