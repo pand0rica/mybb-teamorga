@@ -7,6 +7,7 @@ All notable changes to Teamorga are documented here.
 ## [Unreleased]
 
 ### Added
+- **Add a suggestion afterwards:** authors can attach a suggestion to their own, already posted replies in Teamorga threads via an "Add suggestion" button under the post. Upgrade: deactivate and reactivate the plugin to load the new templates.
 - **UserCP page "My team tasks"** (`usercp.php?action=teamorga`): open topics and unvoted suggestions of the current team member, sorted by deadline (suggestions by post order).
 - **Private reminders** on that page (title, date, note; mark done, reopen, delete) in the new table `teamorga_reminders`.
 - Upgrade: deactivate and reactivate the plugin to create the table and load the new templates.
