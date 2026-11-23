@@ -108,6 +108,7 @@ $l['teamorga_err_no_permission'] = 'No permission.';
 $l['teamorga_err_invalid_vote'] = 'Invalid vote.';
 $l['teamorga_err_not_participant'] = 'You are not registered as a participant for this suggestion.';
 $l['teamorga_msg_vote_saved'] = 'Vote saved.';
+$l['teamorga_msg_vote_withdrawn'] = 'Vote withdrawn.';
 
 // UCP alert settings (alerts.php?action=settings)
 $l['myalerts_setting_teamorga_suggestion_vote'] = "Receive an alert when someone reacts to your suggestion?";
