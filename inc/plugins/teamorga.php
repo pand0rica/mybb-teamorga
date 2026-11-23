@@ -441,8 +441,8 @@ function teamorga_activate()
     // Register MyAlerts alert type
     if (function_exists('myalerts_is_activated') && myalerts_is_activated()
         && class_exists('MybbStuff_MyAlerts_AlertTypeManager')) {
-        $alertTypeManager = MybbStuff_MyAlerts_AlertTypeManager::getInstance();
-        if ($alertTypeManager !== null) {
+        $alertTypeManager = teamorga_alert_type_manager();
+        if ($alertTypeManager) {
             if ($alertTypeManager->getByCode('teamorga_suggestion_vote') === null) {
                 $t = new MybbStuff_MyAlerts_Entity_AlertType();
                 $t->setCode('teamorga_suggestion_vote');
@@ -477,7 +477,7 @@ function teamorga_deactivate()
         // in it – otherwise a later reactivation reads the stale cache and skips
         // re-adding them, and alerts silently stop (see teamorga_get_alert_type()).
         if (class_exists('MybbStuff_MyAlerts_AlertTypeManager')) {
-            $atm = MybbStuff_MyAlerts_AlertTypeManager::getInstance();
+            $atm = teamorga_alert_type_manager();
             if ($atm) {
                 $atm->getAlertTypes(true);
             }
@@ -1895,6 +1895,26 @@ function teamorga_myalerts_register()
 }
 
 /**
+ * MyAlerts' alert-type manager, created on demand.
+ *
+ * getInstance() returns false until MyAlerts has created the instance in one of
+ * its hooks – which never run when the plugin is (re)activated from the CLI (deploy).
+ */
+function teamorga_alert_type_manager()
+{
+    global $db, $cache;
+
+    if (!class_exists('MybbStuff_MyAlerts_AlertTypeManager')) {
+        return null;
+    }
+    $manager = MybbStuff_MyAlerts_AlertTypeManager::getInstance();
+    if (!$manager && method_exists('MybbStuff_MyAlerts_AlertTypeManager', 'createInstance')) {
+        $manager = MybbStuff_MyAlerts_AlertTypeManager::createInstance($db, $cache);
+    }
+    return $manager ?: null;
+}
+
+/**
  * Return an enabled teamorga MyAlerts alert type, recreating the type row on the
  * fly if it is missing from the alert_types table. Returns the type or null.
  *
@@ -1920,7 +1940,7 @@ function teamorga_get_alert_type(string $code)
         return null;
     }
 
-    $manager = MybbStuff_MyAlerts_AlertTypeManager::getInstance();
+    $manager = teamorga_alert_type_manager();
     if (!$manager) {
         return null;
     }
