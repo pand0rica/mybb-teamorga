@@ -13,6 +13,7 @@ All notable changes to Teamorga are documented here.
 - Upgrade: deactivate and reactivate the plugin to create the table and load the new templates.
 
 ### Fixed
+- **Vote could not be withdrawn after "Request changes":** only the "In favour" state offered a *Withdraw* button. Both states now have it; withdrawing sets the vote back to pending, returns to the suggestion's own post and confirms with "Vote withdrawn". Votes and withdrawals on deactivated suggestions are refused. Upgrade: deactivate and reactivate the plugin to load the changed template.
 - **MyAlerts notifications silently stopped firing** (suggestion reactions, time
   proposals) once the alert types went missing from the `alert_types` table. Root
   cause: `teamorga_deactivate()` deleted the alert-type rows without refreshing

@@ -1482,6 +1482,17 @@ function teamorga_postbit(&$post)
             error($lang->teamorga_err_not_participant);
         }
 
+        $sug_row = $db->fetch_array(
+            $db->simple_select("teamorga_suggestions", "owner_uid,pid,tt_id,active", "id={$sug_id}")
+        );
+        if (!$sug_row) {
+            error($lang->teamorga_err_suggestion_not_found);
+        }
+        // Inactive suggestions are closed: no voting, no withdrawing
+        if (empty($sug_row["active"])) {
+            error($lang->teamorga_err_no_permission);
+        }
+
         $db->update_query(
             "teamorga_suggestion_participants",
             ["status" => $db->escape_string($new_status)],
@@ -1492,9 +1503,6 @@ function teamorga_postbit(&$post)
         if ($new_status !== "pending"
             && function_exists('myalerts_is_activated') && myalerts_is_activated()
             && class_exists('MybbStuff_MyAlerts_AlertTypeManager')) {
-            $sug_row   = $db->fetch_array(
-                $db->simple_select("teamorga_suggestions", "owner_uid,pid,tt_id", "id={$sug_id}")
-            );
             $owner_uid = (int) ($sug_row["owner_uid"] ?? 0);
 
             // Don't alert yourself
@@ -1515,7 +1523,10 @@ function teamorga_postbit(&$post)
             }
         }
 
-        redirect("showthread.php?tid={$post['tid']}&pid={$post['pid']}#pid{$post['pid']}", $lang->teamorga_msg_vote_saved);
+        // Back to the suggestion that was voted on (the handler runs in the first suggestion postbit of the page)
+        $sug_pid = (int) $sug_row["pid"];
+        $msg     = $new_status === "pending" ? $lang->teamorga_msg_vote_withdrawn : $lang->teamorga_msg_vote_saved;
+        redirect("showthread.php?tid={$post['tid']}&pid={$sug_pid}#pid{$sug_pid}", $msg);
     }
 
     // --- Render suggestion block ---
